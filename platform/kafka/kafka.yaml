@@ -1,0 +1,47 @@
+volumes:
+  kafka-data:
+
+services:
+  kafka:
+    image: apache/kafka:${KAFKA_TAG:-3.9.0}
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+
+  # Одноразовая задача: создаёт топики из contracts/topics.yaml и завершается.
+  kafka-init:
+    image: apache/kafka:${KAFKA_TAG:-3.9.0}
+    restart: "no"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ["sh", "/scripts/create-topics.sh"]
+    volumes:
+      - ./scripts/create-topics.sh:/scripts/create-topics.sh:ro
+      - ../../contracts/topics.yaml:/contracts/topics.yaml:ro
+
+  kafka-ui:
+    image: ghcr.io/kafbat/kafka-ui:latest
+    container_name: kafbat-ui
+    ports:
+      - "4040:4040" # Открываем UI на localhost:4040
+    environment:
+      # Указываем имя кластера и адрес брокера для подключения
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      # Если используете Schema Registry, раскомментируйте и укажите адрес
+      # KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8081
+      # Включаем возможность менять настройки на лету через UI
+      DYNAMIC_CONFIG_ENABLED: "true"
+    # Если ваш Kafka в другой docker-сети, подключите этот сервис к ней
+
+networks:
+  shared:
+    external: true
+    name: gl1tch-shared

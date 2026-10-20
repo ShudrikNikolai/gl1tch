@@ -1,0 +1,5 @@
+include:
+  - prometheus/prometheus.yaml
+  - grafana/datasources.yaml
+  - tempo/tempo.yaml
+  - otel/otel.yaml

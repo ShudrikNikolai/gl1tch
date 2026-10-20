@@ -1,0 +1,13 @@
+volumes:
+  prometheus-data:
+
+services:
+  prometheus:
+    image: prom/prometheus:${PROMETHEUS_TAG:-v3.0.0}
+    profiles: [obs]
+    restart: unless-stopped
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports: ["127.0.0.1:${PROMETHEUS_PORT:-9090}:9090"]
+    networks: [internal]

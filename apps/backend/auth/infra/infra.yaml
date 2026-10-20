@@ -1,0 +1,3 @@
+include:
+  - postgres/postgres.yaml
+  - redis/redis.yaml

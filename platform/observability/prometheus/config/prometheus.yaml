@@ -1,0 +1,25 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: edge
+    dns_sd_configs:
+      - names: [edge]
+        type: A
+        port: 9180
+
+  # Все сервисы отдают HTTP (/healthz, /metrics) на :8080.
+  # dns_sd находит каждую реплику (docker DNS отдаёт все IP сервиса).
+  - job_name: services
+    metrics_path: /metrics
+    dns_sd_configs:
+      - names: [auth, boards, chats, notifications, ws-gateway]
+        type: A
+        port: 8080
+    relabel_configs:
+      - source_labels: [__meta_dns_name]
+        target_label: service

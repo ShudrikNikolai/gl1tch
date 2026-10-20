@@ -1,0 +1,41 @@
+version: "3"
+
+vars:
+  COMPOSE_FILE: docker-compose.yaml
+  NETWORK_NAME: gl1tch-shared
+  DC: docker compose -f {{.COMPOSE_FILE}}
+  DC_DEV: docker compose -f compose/docker-compose.dev-infra.yaml
+
+tasks:
+  default:
+    cmd: task --list
+
+  create:network:
+    desc: создание общей сети
+    cmd: "docker network create {{.NETWORK_NAME}}"
+
+  dev:
+    desc: Поднять тест окружение для разработки(монго/посгря и т.д.)
+    cmds:
+      - "{{.DC_DEV}} down"
+      - "{{.DC_DEV}} up -d"
+
+  up:
+    desc: Up compose
+    cmds:
+      - "{{.DC}} up -d"
+
+  down:
+    desc: Stop everything
+    cmds:
+      - "{{.DC}} down"
+
+  ps:
+    desc: Info docker containers
+    cmds:
+      - "{{.DC}} ps"
+
+  logs:
+    desc: "Follow logs: task platform:logs -- gateway edge"
+    cmds:
+      - "{{.DC}} logs -f {{.CLI_ARGS}}"

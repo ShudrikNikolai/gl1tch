@@ -1,0 +1,15 @@
+name: gl1tch-platform
+
+networks:
+  internal-net:
+    internal: true
+    name: internal
+  gl1tch-shared:
+    external: true
+    name: gl1tch-shared
+
+include:
+  - path: ./edge/edge.yaml
+  - path: ./gateway/gateway.yaml
+  - path: ./kafka/kafka.yaml
+  - path: ./observability/observability.yaml

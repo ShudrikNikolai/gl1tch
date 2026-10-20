@@ -1,0 +1,14 @@
+{
+	admin off
+	servers {
+		metrics
+	}
+}
+
+:80 {
+	encode zstd gzip
+}
+
+:9180 {
+	metrics
+}
