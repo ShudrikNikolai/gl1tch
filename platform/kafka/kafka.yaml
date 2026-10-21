@@ -8,13 +8,15 @@ services:
     env_file: .env
     volumes:
       - kafka-data:/var/lib/kafka/data
+    networks:
+      - gl1tch-shared
     healthcheck:
       test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1"]
       interval: 10s
       timeout: 10s
       retries: 20
 
-  # Одноразовая задача: создаёт топики из contracts/topics.yaml и завершается.
+  # Одноразовая задача: создаёт топики из proto/topics.yaml и завершается.
   kafka-init:
     image: apache/kafka:${KAFKA_TAG:-3.9.0}
     restart: "no"
@@ -24,13 +26,21 @@ services:
     entrypoint: ["sh", "/scripts/create-topics.sh"]
     volumes:
       - ./scripts/create-topics.sh:/scripts/create-topics.sh:ro
-      - ../../contracts/topics.yaml:/contracts/topics.yaml:ro
+      - ../../proto/topics.yaml:/proto/topics.yaml:ro
+    networks:
+      - gl1tch-shared
 
   kafka-ui:
-    image: ghcr.io/kafbat/kafka-ui:latest
+    image: ghcr.io/kafbat/kafka-ui:${KAFKA_UI_TAG:-latest}
     container_name: kafbat-ui
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_healthy
     ports:
-      - "4040:4040" # Открываем UI на localhost:4040
+      - "127.0.0.1:${KAFKA_UI_PORT:-4040}:8080" # UI на localhost:4040 (внутри контейнера kafbat слушает 8080)
+    networks:
+      - gl1tch-shared
     environment:
       # Указываем имя кластера и адрес брокера для подключения
       KAFKA_CLUSTERS_0_NAME: local
@@ -39,9 +49,3 @@ services:
       # KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8081
       # Включаем возможность менять настройки на лету через UI
       DYNAMIC_CONFIG_ENABLED: "true"
-    # Если ваш Kafka в другой docker-сети, подключите этот сервис к ней
-
-networks:
-  shared:
-    external: true
-    name: gl1tch-shared

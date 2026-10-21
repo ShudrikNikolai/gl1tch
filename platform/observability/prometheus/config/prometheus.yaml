@@ -23,3 +23,10 @@ scrape_configs:
     relabel_configs:
       - source_labels: [__meta_dns_name]
         target_label: service
+
+  - job_name: envoy
+    metrics_path: /stats/prometheus
+    dns_sd_configs:
+      - names: [ envoy ]
+        type: A
+        port: 9901

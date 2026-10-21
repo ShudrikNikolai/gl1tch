@@ -1,0 +1,16 @@
+node: { id: envoy, cluster: gateway } # обязательны, т.к. есть dynamic_resources
+
+# REST/JSON снаружи -> gRPC внутри. Caddy (/api/* без префикса) -> envoy:8080 -> auth/users.
+# Порядок фильтров важен: jwt_authn -> rbac -> grpc_json_transcoder -> router.
+admin:
+  address:
+    socket_address: { address: 0.0.0.0, port_value: 9901 } # 127.0.0.1 только внутри контейнера / потом убрать или вообще заменить
+
+# Листенеры и кластеры вынесены в lds.yaml / cds.yaml и подхватываются из файлов
+dynamic_resources:
+  lds_config:
+    resource_api_version: V3
+    path_config_source: { path: /etc/envoy/lds.yaml }
+  cds_config:
+    resource_api_version: V3
+    path_config_source: { path: /etc/envoy/cds.yaml }

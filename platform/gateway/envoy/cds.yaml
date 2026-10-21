@@ -1,0 +1,61 @@
+resources:
+  # JWKS: обычный HTTP на auth
+  - name: auth-http
+    "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+    type: STRICT_DNS
+    connect_timeout: 2s
+    load_assignment:
+      cluster_name: auth-http
+      endpoints:
+        - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address: { address: auth, port_value: 8080 }
+  - name: auth-grpc
+    "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+    type: STRICT_DNS
+    connect_timeout: 2s
+    typed_extension_protocol_options:
+      envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+        "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+        explicit_http_config:
+          http2_protocol_options: {}
+    load_assignment:
+      cluster_name: auth-grpc
+      endpoints:
+        - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address: { address: auth, port_value: 50051 }
+  - name: users-grpc
+    "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+    type: STRICT_DNS
+    connect_timeout: 2s
+    typed_extension_protocol_options:
+      envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+        "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+        explicit_http_config:
+          http2_protocol_options: {}
+    load_assignment:
+      cluster_name: users-grpc
+      endpoints:
+        - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address: { address: users, port_value: 50051 }
+  - name: otel-collector
+    "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+    type: STRICT_DNS
+    connect_timeout: 2s
+    typed_extension_protocol_options:
+      envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+        "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+        explicit_http_config:
+          http2_protocol_options: { }
+    load_assignment:
+      cluster_name: otel-collector
+      endpoints:
+        - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address: { address: otel-collector, port_value: 4317 }

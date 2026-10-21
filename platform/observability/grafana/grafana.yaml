@@ -4,7 +4,6 @@ volumes:
 services:
   grafana:
     image: grafana/grafana:${GRAFANA_TAG:-11.3.0}
-    profiles: [obs]
     restart: unless-stopped
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
@@ -13,4 +12,4 @@ services:
       - grafana-data:/var/lib/grafana
       - ./config/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
     ports: ["127.0.0.1:${GRAFANA_PORT:-3001}:3000"]
-    networks: [internal]
+    networks: [gl1tch-shared, internal-net]

@@ -7,6 +7,15 @@
 
 :80 {
 	encode zstd gzip
+
+	# /api/* -> envoy, префикс /api срезается (в proto-аннотациях пути без него)
+	handle_path /api/* {
+		reverse_proxy envoy:8080
+	}
+
+	# handle {
+	# 	reverse_proxy frontend:3000
+	# }
 }
 
 :9180 {

@@ -1,12 +1,11 @@
 services:
   otel-collector:
     image: otel/opentelemetry-collector-contrib:${OTELCOL_TAG:-0.114.0}
-    profiles: [obs]
     restart: unless-stopped
     command: ["--config=/etc/otelcol/config.yaml"]
     volumes:
-      - ./config/config.yaml:/etc/otelcol/config.yaml:ro
+      - ./config/otel.yaml:/etc/otelcol/config.yaml:ro
     ports:
       - "127.0.0.1:${OTLP_GRPC_PORT:-4317}:4317"   # OTLP gRPC для сервисов, запущенных с хоста
       - "127.0.0.1:${OTLP_HTTP_PORT:-4318}:4318"   # OTLP HTTP
-    networks: [gl1tch-shared, internal]
+    networks: [gl1tch-shared, internal-net]

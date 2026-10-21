@@ -11,5 +11,5 @@ networks:
 include:
   - path: ./edge/edge.yaml
   - path: ./gateway/gateway.yaml
-  - path: ./kafka/kafka.yaml
   - path: ./observability/observability.yaml
+    #  - path: ./kafka/kafka.yaml TODO

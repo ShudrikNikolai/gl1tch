@@ -1,5 +1,5 @@
 #!/bin/sh
-# Создаёт топики из /contracts/topics.yaml (смонтирован из contracts/topics.yaml).
+# Создаёт топики из /proto/topics.yaml (смонтирован из proto/topics.yaml).
 # Ожидаемый формат:
 #   topics:
 #     - name: posts.events
@@ -9,7 +9,7 @@
 set -eu
 
 BOOTSTRAP="${KAFKA_BOOTSTRAP:-kafka:9092}"
-FILE="${TOPICS_FILE:-/contracts/topics.yaml}"
+FILE="${TOPICS_FILE:-/proto/topics.yaml}"
 
 awk '
   /^[[:space:]]*- name:/ { if (name != "") print name, p, r; name = $3; p = 1; r = 1 }
