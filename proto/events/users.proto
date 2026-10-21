@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package events;
+
+import "common/v1/common.proto";
+
+message BanUserRequest {
+  string user_id = 1;
+}
+message BanUserResponse {
+  string user_id = 1;
+  common.v1.UserStatus status = 2;
+}
+
+/*
+// привязаться к след -> admin дергается в envoy п оrbac
+лучше потом сделать grpc: admin/v1/admin.proto, и от туда по kafke обновлять user и auth
+ rpc BanUser(BanUserRequest) returns (BanUserResponse) {
+    option (google.api.http) = { post: "/admin/users/{user_id}/ban" };
+  }
+
+*/

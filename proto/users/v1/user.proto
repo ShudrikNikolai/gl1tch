@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package auth.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+import "common/v1/common.proto";
+
+service UserService {
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+  rpc Me(MeRequest) returns (MeResponse) {
+    option (google.api.http) = { get: "/users/me" };
+  }
+  rpc GetUser(GetUserRequest) returns (GetUserResponse) {
+    option (google.api.http) = { get: "/users/{user_id}" };
+  }
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
+    option (google.api.http) = { get: "/users" };
+  }
+}
+
+message CreateUserResponse {
+  User user = 1;
+}
+message CreateUserRequest {
+  string user_id = 1;
+  string username = 2;
+}
+
+message MeResponse {
+  User user = 1;
+}
+message MeRequest {}
+
+message GetUserRequest {
+  string user_id = 1;
+}
+message GetUserResponse {
+  User user = 1;
+}
+
+message ListUsersRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+  string filter = 3;        // "user_id IN (a, b, c) AND is_banned = false"
+  string order_by = 4;
+}
+message ListUsersResponse {
+  repeated User users = 1;
+  common.v1.CursorPagination cursor = 2;
+}
+
+message User {
+  string user_id = 1;
+  string username = 2;
+
+  common.v1.Role role = 3;
+  common.v1.UserStatus status = 4;
+
+  reserved 5, 6, 7, 8, 11; // под будущие поля
+
+  google.protobuf.Timestamp created_at = 12;
+  google.protobuf.Timestamp updated_at = 13;
+}

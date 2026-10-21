@@ -1,0 +1,26 @@
+version: 3
+
+vars:
+  PROTO: proto
+
+
+tasks:
+  default:
+    cmd: task --list
+
+  up:
+
+
+  proto:lint:
+    desc: линтовка proto файлов
+    cmd: "cd proto && buf lint"
+
+  proto:build:
+    desc: билд в shared proto контрактов
+    deps:
+      - proto:lint
+    cmd: "cd proto && buf generate"
+
+  up:platform:
+
+  up:apps:

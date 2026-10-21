@@ -1,0 +1,23 @@
+version: v2
+
+managed:
+  enabled: true
+  disable:
+    # иначе managed mode перепишет go_package у googleapis и сломает импорты
+    - module: buf.build/googleapis/googleapis
+  override:
+    - file_option: go_package_prefix
+      value: github.com/ShudrikNikolai/gl1tch/backend/shared
+
+plugins:
+  # Go - типы сообщений
+  - remote: buf.build/protocolbuffers/go:v1.36.12
+    out: ../backend/shared/pkg/grpcx/api
+    opt:
+      - paths=source_relative
+
+  # Go - gRPC stubs
+  - remote: buf.build/grpc/go:v1.6.2
+    out: ../backend/shared/pkg/grpcx/api
+    opt:
+      - paths=source_relative

@@ -14,6 +14,14 @@ tasks:
     desc: создание общей сети
     cmd: "docker network create {{.NETWORK_NAME}}"
 
+  proto:gen:
+    desc: Go-код из proto + дескриптор для envoy
+    dir: ../proto
+    cmds:
+      - buf dep update
+      - buf generate
+      - buf build -o ../platform/gateway/envoy/api.binpb
+
   dev:
     desc: Поднять тест окружение для разработки(монго/посгря и т.д.)
     cmds:

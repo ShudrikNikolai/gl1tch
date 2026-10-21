@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package common.v1;
+
+enum Role {
+  ROLE_UNSPECIFIED = 0;
+  ROLE_USER = 1;
+  ROLE_MODERATOR = 2;
+  ROLE_ADMIN = 3;
+}
+
+enum UserStatus {
+  USER_STATUS_UNSPECIFIED = 0;
+  USER_STATUS_ACTIVE = 1;
+  USER_STATUS_BANNED = 2;
+  USER_STATUS_DELETED = 3;
+  USER_STATUS_PENDING = 4;
+}
+
+message CursorPagination {
+  int32 page_size = 1;
+  string page_token = 2;
+}
