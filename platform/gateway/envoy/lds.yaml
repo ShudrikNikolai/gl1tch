@@ -35,6 +35,9 @@ resources:
                       # Маршрут выбирается ПОСЛЕ транскодинга, по gRPC-пути
                       - match: { prefix: "/auth.v1.AuthService/" }
                         route: { cluster: auth-grpc, timeout: 3s }
+                        request_headers_to_add: # устанавливаем куку
+                          - header: { key: x-token-transport, value: cookie }
+                            append_action: OVERWRITE_IF_EXISTS_OR_ADD
                       - match: { prefix: "/auth.v1.UserService/" }
                         route: { cluster: users-grpc, timeout: 3s }
               http_filters:
