@@ -56,6 +56,7 @@ resources:
                         claim_to_headers:
                           - { header_name: x-user-id, claim_name: sub }
                           - { header_name: x-roles, claim_name: role }
+                          - { header_name: x-roles, claim_name: roles_csv }
                         payload_in_metadata: jwt_payload
                     rules:
                       # публичные: регистрация, логин, refresh, logout
@@ -84,8 +85,8 @@ resources:
                                 sourced_metadata:
                                   metadata_matcher:
                                     filter: envoy.filters.http.jwt_authn
-                                    path: [{ key: jwt_payload }, { key: role }]
-                                    value: { string_match: { exact: admin } }
+                                    path: [ { key: jwt_payload }, { key: roles } ]
+                                    value: { list_match: { one_of: { string_match: { exact: admin } } } }
                 - name: envoy.filters.http.grpc_json_transcoder
                   typed_config:
                     "@type": type.googleapis.com/envoy.extensions.filters.http.grpc_json_transcoder.v3.GrpcJsonTranscoder
