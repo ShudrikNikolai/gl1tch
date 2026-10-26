@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/enum"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health/grpc_health_v1"
@@ -90,13 +91,13 @@ func call(ctx context.Context, conn *grpc.ClientConn, text string) (string, erro
 
 func TestMetadataPropagation(t *testing.T) {
 	var gotRID, gotUID string
-	var gotRoles []string
+	var gotRoles []enum.Role
 	e := start(t, func(ctx context.Context, in *wrapperspb.StringValue) (*wrapperspb.StringValue, error) {
 		gotRID, gotUID, gotRoles = reqctx.RequestID(ctx), reqctx.UserID(ctx), reqctx.Roles(ctx)
 		return in, nil
 	}, 0)
 
-	ctx := reqctx.WithUser(reqctx.WithRequestID(context.Background(), "req-42"), "user-7", []string{"user", "moder"})
+	ctx := reqctx.WithUser(reqctx.WithRequestID(context.Background(), "req-42"), "user-7", []enum.Role{"user", "moder"})
 	if _, err := call(ctx, e.conn, "x"); err != nil {
 		t.Fatal(err)
 	}

@@ -8,6 +8,8 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"slices"
+
+	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/enum"
 )
 
 // Имена заголовков HTTP и ключей метаданных gRPC (gateway -> сервисы)
@@ -18,13 +20,6 @@ const (
 	HeaderTraceparent = "traceparent"
 )
 
-// Роли пользователей
-const (
-	RoleUser      = "user"
-	RoleModerator = "moder"
-	RoleAdmin     = "admin"
-)
-
 type ctxKey int
 
 const (
@@ -33,6 +28,7 @@ const (
 	rolesKey
 )
 
+// TODO править все!!!
 // NewRequestID генерирует идентификатор запроса (16 случайных байт в hex)
 // //TODO заменить uuid
 func NewRequestID() string {
@@ -53,7 +49,7 @@ func RequestID(ctx context.Context) string {
 }
 
 // WithUser сохраняет id пользователя и его роли (копия среза)
-func WithUser(ctx context.Context, userID string, roles []string) context.Context {
+func WithUser(ctx context.Context, userID string, roles []enum.Role) context.Context {
 	ctx = context.WithValue(ctx, userIDKey, userID)
 	return context.WithValue(ctx, rolesKey, slices.Clone(roles))
 }
@@ -65,12 +61,12 @@ func UserID(ctx context.Context) string {
 }
 
 // Roles возвращает копию ролей пользователя
-func Roles(ctx context.Context) []string {
-	roles, _ := ctx.Value(rolesKey).([]string)
+func Roles(ctx context.Context) []enum.Role {
+	roles, _ := ctx.Value(rolesKey).([]enum.Role)
 	return slices.Clone(roles)
 }
 
-func HasRole(ctx context.Context, role string) bool {
-	roles, _ := ctx.Value(rolesKey).([]string)
+func HasRole(ctx context.Context, role enum.Role) bool {
+	roles, _ := ctx.Value(rolesKey).([]enum.Role)
 	return slices.Contains(roles, role)
 }

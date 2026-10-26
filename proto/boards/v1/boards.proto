@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package boards.v1; // доски/разделы -> темы -> посты
+
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+import "boards/v1/common.proto";
+
+service BoardService {
+  rpc CreateBoard(CreateBoardRequest) returns (CreateBoardResponse) {  // admin|moder
+    option (google.api.http) = { post: "/v1/boards" body: "*" };
+  };
+  rpc ListBoards(ListBoardsRequest) returns (ListBoardsResponse) {
+    option (google.api.http) = { get: "/v1/boards" };
+  };
+  rpc GetBoard(GetBoardRequest) returns (GetBoardResponse) {
+    option (google.api.http) = { get: "/v1/boards/{board_id}" };
+  };
+}
+
+message Board {
+  string board_id = 1;
+  string slug = 2;
+  string title = 3;
+  string description = 4;
+
+  Visibility visibility = 5;
+
+  int32 thread_count = 6;
+  int32 post_count = 7;
+
+  Author last_post_author = 8;     // для превью, крайний пост
+
+  google.protobuf.Timestamp last_post_at = 9;
+
+  int32 sort_order = 10;
+}
+
+message ListBoardsRequest {}
+
+message ListBoardsResponse {
+  repeated Board boards = 1;
+}
+
+message GetBoardRequest {
+  string board_id = 1;
+}
+
+message GetBoardResponse {
+  Board board = 1;
+}
+
+message CreateBoardRequest {
+  string slug = 1;
+  string title = 2;
+  string description = 3;
+
+  Visibility visibility = 4;
+
+  int32 sort_order = 5;
+}
+
+message CreateBoardResponse {
+  Board board = 1;
+}

@@ -9,7 +9,8 @@ import (
 
 	sharedConfig "github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/config"
 	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/logger"
-	"github.com/jcmturner/gokrb5/v8/config"
+	"github.com/ShudrikNikolai/gl1tch/backend/users/internal/app"
+	"github.com/ShudrikNikolai/gl1tch/backend/users/internal/infrastructure/config"
 	_ "github.com/joho/godotenv/autoload"
 )
 

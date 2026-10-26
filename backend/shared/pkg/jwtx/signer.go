@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -76,7 +77,8 @@ func (s *Signer) Sign(userID string, roles []string, now time.Time) (token strin
 			ExpiresAt: jwt.NewNumericDate(expiresAt),
 			ID:        hex.EncodeToString(jti),
 		},
-		Roles: roles,
+		Roles:    roles,
+		RolesCSV: strings.Join(roles, ","),
 	}
 	t := jwt.NewWithClaims(jwt.SigningMethodEdDSA, claims)
 	t.Header["kid"] = s.kid

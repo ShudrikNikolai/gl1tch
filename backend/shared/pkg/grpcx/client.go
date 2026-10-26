@@ -60,9 +60,12 @@ func outgoing(ctx context.Context) context.Context {
 	pairs := []string{reqctx.HeaderRequestID, rid}
 	if uid := reqctx.UserID(ctx); uid != "" {
 		pairs = append(pairs, reqctx.HeaderUserID, uid)
-		if roles := reqctx.Roles(ctx); len(roles) > 0 {
-			pairs = append(pairs, reqctx.HeaderRoles, strings.Join(roles, ","))
+		roles := reqctx.Roles(ctx)
+		parts := make([]string, len(roles))
+		for i, r := range roles {
+			parts[i] = string(r)
 		}
+		pairs = append(pairs, reqctx.HeaderRoles, strings.Join(parts, ","))
 	}
 
 	return metadata.AppendToOutgoingContext(ctx, pairs...)

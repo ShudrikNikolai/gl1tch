@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package boards.v1;
+
+enum OrderByThread {
+  ORDER_BY_THREAD_UNSPECIFIED = 0;   // = LAST_POST_AT
+  ORDER_BY_THREAD_CREATED_AT = 1;
+  ORDER_BY_THREAD_UPDATED_AT = 2;
+  ORDER_BY_THREAD_LAST_POST_AT = 3;  // «бамп»: тема с новым ответом поднимается. Закреплённые темы всегда сверху
+}
+
+enum Visibility {
+  VISIBILITY_UNSPECIFIED = 0;
+  VISIBILITY_PUBLIC = 1;       // видно всем
+  VISIBILITY_AUTHOR = 2;       // только автору
+  VISIBILITY_MODERATOR = 3;       // только модерам
+}
+
+enum ThreadStatus {
+  THREAD_STATUS_UNSPECIFIED = 0;
+  THREAD_STATUS_OPEN = 1;
+  THREAD_STATUS_LOCKED = 2;    // только чтение
+  THREAD_STATUS_ARCHIVED = 3;  // скрыта из активных, но доступна
+}
+
+enum ThreadCategory {
+  THREAD_CATEGORY_UNSPECIFIED = 0;
+  THREAD_CATEGORY_GENERAL = 1;       // общее обсуждение
+  THREAD_CATEGORY_FAQ = 2;
+
+  THREAD_CATEGORY_FLOOD = 10;
+}
+
+// Краткая информация об авторе
+message Author {
+  string user_id = 1;
+  string username = 2;
+}

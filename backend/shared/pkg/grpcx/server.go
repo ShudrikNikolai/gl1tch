@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/enum"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
@@ -101,10 +102,16 @@ func contextFromIncoming(ctx context.Context) context.Context {
 	}
 	ctx = reqctx.WithRequestID(ctx, rid)
 
+	// TODO как дойдут руки переписать
 	if uid := first(md, reqctx.HeaderUserID); uid != "" {
-		var roles []string
+		var roles []enum.Role
 		if r := first(md, reqctx.HeaderRoles); r != "" {
-			roles = strings.Split(r, ",")
+			parts := strings.Split(r, ",")
+			roles = make([]enum.Role, 0, len(parts))
+			for _, p := range parts {
+				roles = append(roles, enum.Role(p))
+			}
+
 		}
 		ctx = reqctx.WithUser(ctx, uid, roles)
 	}

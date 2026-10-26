@@ -7,7 +7,7 @@ managed:
     - module: buf.build/googleapis/googleapis
   override:
     - file_option: go_package_prefix
-      value: github.com/ShudrikNikolai/gl1tch/backend/shared
+      value: github.com/ShudrikNikolai/gl1tch/backend/shared/proto/api
 
 plugins:
   # Go - типы сообщений

@@ -1,0 +1,154 @@
+syntax = "proto3";
+
+package boards.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+import "boards/v1/common.proto";
+import "boards/v1/posts.proto";
+import "common/v1/common.proto";
+import "google/protobuf/empty.proto";
+
+service ThreadService {
+  rpc CreateThread(CreateThreadRequest) returns (CreateThreadResponse) {
+    option (google.api.http) = { post: "/v1/threads" body: "*" };
+  }
+  rpc ListThreads(ListThreadsRequest) returns (ListThreadsResponse) {
+    option (google.api.http) = { get: "/v1/threads" };
+  };
+  rpc GetThread(GetThreadRequest) returns (GetThreadResponse) {
+    option (google.api.http) = { get: "/v1/threads/{thread_id}" };
+  }
+  rpc UpdateThread(UpdateThreadRequest) returns (UpdateThreadResponse) {
+    option (google.api.http) = { patch: "/v1/threads/{thread_id}" body: "*" };
+  }
+  rpc LockThread(LockThreadRequest) returns (LockThreadResponse) {
+    option (google.api.http) = { patch: "/v1/threads/{thread_id}/lock" body: "*" };
+  }
+  rpc UnlockThread(UnlockThreadRequest) returns (UnlockThreadResponse) {
+    option (google.api.http) = { patch: "/v1/threads/{thread_id}/unlock" body: "*" };
+  }
+  rpc PinThread(PinThreadRequest) returns (PinThreadResponse) {
+    option (google.api.http) = { patch: "/v1/threads/{thread_id}/pin" body: "*" };
+  }
+  rpc UnpinThread(UnpinThreadRequest) returns (UnpinThreadResponse) {
+    option (google.api.http) = { patch: "/v1/threads/{thread_id}/unpin" body: "*" };
+  }
+  rpc DeleteThread(DeleteThreadRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = { delete: "/v1/threads/{thread_id}" };
+  }
+}
+
+message Thread {
+  string thread_id = 1;
+  string board_id = 2;
+  string title = 3;
+  string slug = 4;
+
+  Author author = 5;
+
+  ThreadStatus status = 6;
+  ThreadCategory category = 7;
+
+  Visibility visibility = 8;
+
+  bool pinned = 11;
+  // Последняя активность
+  Author last_post_author = 12;
+  google.protobuf.Timestamp last_post_at = 13;
+
+  google.protobuf.Timestamp created_at = 16;
+  google.protobuf.Timestamp updated_at = 17;
+}
+
+message ListThreadsRequest {
+  string board_id = 1;
+
+  ThreadCategory category = 2;           // фильтр по категории
+  ThreadStatus status = 3;
+
+  string search = 4;                     // полнотекстовый поиск
+  string author_user_id = 5;
+
+  OrderByThread order_by = 6;
+
+  common.v1.CursorPaginationRequest page = 7;
+}
+
+message ListThreadsResponse {
+  repeated Thread threads = 1;
+
+  common.v1.CursorPaginationResponse page = 2;
+}
+
+message GetThreadRequest {
+  string thread_id = 1;
+  // bool increment_view = 2; // мб потом отдельной ручкой, чтобы через кафку обновиить
+}
+
+message GetThreadResponse {
+  Thread thread = 1;
+}
+
+message CreateThreadRequest {
+  string board_id = 1;
+  string title = 2;
+  string body = 3;                       // первый пост
+
+  ThreadCategory category = 4;
+  Visibility visibility = 5;
+}
+
+message CreateThreadResponse {
+  Thread thread = 1;
+  Post first_post = 2;
+}
+
+message UpdateThreadRequest {
+  string thread_id = 1;
+  string title = 2;
+  ThreadCategory category = 3;
+  Visibility visibility = 4;
+}
+
+message UpdateThreadResponse {
+  Thread thread = 1;
+}
+
+message UnlockThreadRequest {
+  string thread_id = 1;
+  string reason = 2; // добавить потом в common
+}
+
+message UnlockThreadResponse {
+  Thread thread = 1;
+}
+
+message LockThreadRequest {
+  string thread_id = 1;
+  string reason = 2; // добавить потом в common
+}
+
+message LockThreadResponse {
+  Thread thread = 1;
+}
+
+message UnpinThreadRequest {
+  string thread_id = 1;
+}
+
+message UnpinThreadResponse {
+  Thread thread = 1;
+}
+
+message PinThreadRequest {
+  string thread_id = 1;
+}
+
+message PinThreadResponse {
+  Thread thread = 1;
+}
+
+message DeleteThreadRequest {
+  string thread_id = 1;
+}
