@@ -1,3 +1,4 @@
+-- +goose Up
 CREATE TABLE IF NOT EXISTS credentials (
                                            user_id       uuid PRIMARY KEY,
                                            username      text        NOT NULL,
@@ -7,3 +8,6 @@ CREATE TABLE IF NOT EXISTS credentials (
 
 -- логин уникален без учёта регистра (репозиторий сравнивает lower(username))
 CREATE UNIQUE INDEX IF NOT EXISTS credentials_username_lower_idx ON credentials (lower(username));
+
+-- +goose Down
+DROP TABLE IF EXISTS credentials;

@@ -63,3 +63,30 @@ func validateNickname(n string) (string, error) {
 
 	return n, nil
 }
+
+// Registration проверяет логин и пароль при регистрации и возвращает нормализованный логин.
+func Registration(username, password string) (string, error) {
+	nick, err := validateNickname(username)
+	if err != nil {
+		return "", err
+	}
+	if err := validatePassword(password); err != nil {
+		return "", err
+	}
+
+	return nick, nil
+}
+
+// Login не применяет правила регистрации (они могли измениться), а только отсекает пустой и чрезмерно длинный ввод,
+// чтобы не отдавать Argon2 гигантские пароли.
+func Login(username, password string) (string, error) {
+	username = strings.TrimSpace(username)
+	if username == "" || password == "" {
+		return "", badRequest("username and password are required")
+	}
+	if utf8.RuneCountInString(username) > maxNickRunes || len(password) > maxPasswordBytes {
+		return "", badRequest("invalid username or password")
+	}
+
+	return username, nil
+}

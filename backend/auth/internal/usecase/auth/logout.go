@@ -1,5 +1,8 @@
 package auth
 
-func (uc *UseCase) Logout(username, password string) error {
-	return nil
+import "context"
+
+// Logout завершает текущую сессию. Повторный logout и неизвестный токен не ошибка.
+func (uc *UseCase) Logout(ctx context.Context, refreshToken string) error {
+	return uc.refresh.Revoke(ctx, refreshToken)
 }

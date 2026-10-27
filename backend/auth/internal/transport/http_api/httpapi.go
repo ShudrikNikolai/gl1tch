@@ -39,7 +39,7 @@ func New(jwks func() []byte, deps map[string]Pinger) http.Handler {
 		var failed []string
 		for name, p := range deps {
 			if err := p.Ping(ctx); err != nil {
-				failed = append(failed, name) // только имя: текст ошибки может содержать адреса и учётные данные
+				failed = append(failed, name)
 			}
 		}
 		if len(failed) > 0 {

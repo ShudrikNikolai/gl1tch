@@ -14,7 +14,8 @@ import (
 // Claims claims access-токена. Subject это id пользователя.
 type Claims struct {
 	jwt.RegisteredClaims
-	Roles []string `json:"roles"`
+	Roles    []string `json:"roles"`
+	RolesCSV string   `json:"roles_csv,omitempty"` // для Envoy: claim_to_headers умеет только строки
 }
 
 var (

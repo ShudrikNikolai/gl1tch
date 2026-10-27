@@ -40,7 +40,11 @@ func (a *App) Run(ctx context.Context) error {
 		return err
 	}
 
-	log.Info("auth started", slog.Int("http_port", cfg.HTTPPort), slog.Int("grpc_port", cfg.GRPCPort))
+	log.Info(
+		"auth started",
+		slog.Int("http_port", cfg.HTTPPort),
+		slog.Int("grpc_port", cfg.GRPCPort),
+	)
 
 	return a.di.Serve(ctx, httpLn, grpcLn)
 }

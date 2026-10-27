@@ -39,6 +39,11 @@ type Security struct {
 
 	RefreshReuseGrace time.Duration `env:"REFRESH_REUSE_GRACE" envDefault:"5s"`
 	RevocationChannel string        `env:"REVOCATION_CHANNEL" envDefault:"auth.revocations"`
+
+	// Cookie с refresh-токеном для браузерных клиентов (когда Envoy добавил x-token-transport: cookie).
+	CookieName   string `env:"COOKIE_NAME"   envDefault:"rt"`
+	CookiePath   string `env:"COOKIE_PATH"   envDefault:"/api/auth"` // путь с точки зрения браузера, Caddy срезает /api позже
+	CookieSecure bool   `env:"COOKIE_SECURE" envDefault:"true"`      // для локальной разработки по http: false
 }
 
 type Argon2 struct {

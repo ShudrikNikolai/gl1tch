@@ -6,9 +6,10 @@ import (
 	"github.com/ShudrikNikolai/gl1tch/backend/auth/internal/usecase/models"
 )
 
+// AuthUseCase то, что транспорт знает о бизнес-логике. Ошибки возвращаются как apperr.
 type AuthUseCase interface {
-	//Login()
-	//Logout()
-	//Refresh()
-	Register(ctx context.Context, data *models.BaseAuthRequest) *models.BaseAuthResponse
+	Register(ctx context.Context, req *models.BaseAuthRequest) (*models.BaseAuthResponse, error)
+	Login(ctx context.Context, req *models.BaseAuthRequest) (*models.BaseAuthResponse, error)
+	Refresh(ctx context.Context, refreshToken string) (*models.RefreshResponse, error)
+	Logout(ctx context.Context, refreshToken string) error
 }

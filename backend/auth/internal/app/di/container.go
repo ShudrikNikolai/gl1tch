@@ -6,14 +6,16 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
-	"time"
 
+	"github.com/ShudrikNikolai/gl1tch/backend/auth/internal/adapters/grpc/users"
 	"github.com/ShudrikNikolai/gl1tch/backend/auth/internal/infrastructure/config"
 	"github.com/ShudrikNikolai/gl1tch/backend/auth/internal/infrastructure/storage/pg"
-	httpapi "github.com/ShudrikNikolai/gl1tch/backend/auth/internal/transport/http_api"
+	credrepo "github.com/ShudrikNikolai/gl1tch/backend/auth/internal/modules/credentials/repository"
+	credsvc "github.com/ShudrikNikolai/gl1tch/backend/auth/internal/modules/credentials/service"
+	rtrepo "github.com/ShudrikNikolai/gl1tch/backend/auth/internal/modules/refresh_tokens/repository"
+	rtsvc "github.com/ShudrikNikolai/gl1tch/backend/auth/internal/modules/refresh_tokens/service"
 	authcase "github.com/ShudrikNikolai/gl1tch/backend/auth/internal/usecase/auth"
 	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/cache/redis"
-	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/grpcx"
 	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/jwtx"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
@@ -31,7 +33,15 @@ type Container struct {
 	Rdb *redis.Client
 	Pgx *pg.Client
 
+	Signer *jwtx.Signer
+	Users  *users.Client
+
 	AuthCase *authcase.UseCase
+
+	credRepo credrepo.Repository
+	rtRepo   rtrepo.Repository
+	credSvc  *credsvc.Service
+	rtSvc    *rtsvc.Service
 }
 
 func New(ctx context.Context, cfg config.Config, log *slog.Logger) (*Container, error) {
@@ -40,99 +50,36 @@ func New(ctx context.Context, cfg config.Config, log *slog.Logger) (*Container, 
 		Log: log,
 	}
 
-	if err := c.initStorage(ctx); err != nil {
-		log.Error("Failed to init storage", "error", err)
-		return nil, err
+	steps := []struct {
+		name string
+		run  func() error
+	}{
+		{"storage", func() error { return c.initStorage(ctx) }},
+		{"migrate", func() error { return c.initMigration(ctx) }},
+		{"repo", func() error { return c.initRepo(ctx) }},
+		{"clients", func() error { return c.initClients(ctx) }},
+		{"services", func() error { return c.initServices(ctx) }},
+		{"usecases", func() error { return c.initUseCases(ctx) }},
+		{"servers", func() error { return c.initServers() }},
 	}
+	for _, s := range steps {
+		if err := s.run(); err != nil {
+			log.Error("Failed to init "+s.name, "error", err)
+			c.Close()
 
-	if err := c.initRepo(ctx); err != nil {
-		log.Error("Failed to init repo", "error", err)
-		return nil, err
-	}
-
-	if err := c.initService(ctx); err != nil {
-		log.Error("Failed to init service", "error", err)
-		return nil, err
-	}
-
-	// todo init pg + redis -> собрать в отдельный пакет
-	/*
-
-		pool, err := pgrepo.Connect(ctx, cfg.DatabaseURL)
-		if err != nil {
 			return nil, err
 		}
-
-		rdb := redis.New(cfg.Redis, log)
-
-		// Единая точка отката, пока контейнер не собран.
-		closeAll := func() {
-			rdb.Close()
-			pool.Close()
-		}
-
-		if err := rdb.Ping(ctx); err != nil {
-			closeAll()
-			return nil, fmt.Errorf("redis: %w", err)
-		}
-	*/
-	signer, err := jwtx.LoadSigner(
-		cfg.Security.JWTPrivateKeyFile,
-		cfg.Security.JWTIssuer,
-		cfg.Security.AccessTTL,
-	)
-
-	if err != nil {
-		// closeAll()
-		return nil, err
 	}
 
-	// TODO для клиента так же
-	/*
-		users, err := newUsersClient(cfg, log)
-		if err != nil {
-			closeAll()
-			return nil, err
-		}
-
-		repo := pgrepo.New(pool)
-
-		svc, err := service.New(service.Deps{
-			Repo:     {}, // repo,
-			Sessions: {}, // session.NewStore(rdb, cfg.RefreshTTL, cfg.RefreshReuseGrace),
-			Users:    {}, // users,
-			Revoker:  revocation.NewPublisher(rdb, cfg.RevocationChannel),
-			Hasher:   password.NewArgon2(cfg.Argon2),
-			Signer:   signer,
-			Log:      log,
-		})
-		if err != nil {
-			closeAll()
-			return nil, err
-		}
-	*/
-
-	grpcSrv := grpcx.NewServer(log)
-	// grpcapi.RegisterServer(grpcSrv, svc)
-	healthSrv := grpcx.RegisterHealth(grpcSrv)
-	httpSrv := &http.Server{
-		Handler: httpapi.New(
-			signer.JWKS,
-			map[string]httpapi.Pinger{"postgres": nil, "redis": nil},
-			//map[string]httpapi.Pinger{"postgres": pool, "redis": rdb},
-		),
-		ReadHeaderTimeout: 5 * time.Second,
-		IdleTimeout:       60 * time.Second,
-	}
-
-	c.Grpc = grpcSrv
-	c.Http = httpSrv
-	c.Health = healthSrv
 	return c, nil
 }
 
-// Close освобождает ресурсы. Порядок важен: сначала redis (там сессии)
+// Close освобождает ресурсы. Порядок важен: сначала клиент users, потом redis (там сессии), потом postgres.
+// Серверы останавливает Serve.
 func (c *Container) Close() {
+	if c.Users != nil {
+		_ = c.Users.Close()
+	}
 	if c.Rdb != nil {
 		_ = c.Rdb.Close()
 	}
