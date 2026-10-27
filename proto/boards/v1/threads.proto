@@ -52,6 +52,9 @@ message Thread {
 
   Visibility visibility = 8;
 
+  int32 post_count = 9;
+  // int64 view_count = 10; // позже, обновление пачками через Kafka
+
   bool pinned = 11;
   // Последняя активность
   Author last_post_author = 12;
@@ -67,10 +70,10 @@ message ListThreadsRequest {
   ThreadCategory category = 2;           // фильтр по категории
   ThreadStatus status = 3;
 
-  string search = 4;                     // полнотекстовый поиск
+  string search = 4;                     // пока простой поиск по заголовку, потом отдельный search-сервис
   string author_user_id = 5;
 
-  OrderByThread order_by = 6;
+  OrderByThread order_by = 6;            // закреплённые темы всегда первыми
 
   common.v1.CursorPaginationRequest page = 7;
 }
@@ -83,7 +86,7 @@ message ListThreadsResponse {
 
 message GetThreadRequest {
   string thread_id = 1;
-  // bool increment_view = 2; // мб потом отдельной ручкой, чтобы через кафку обновиить
+  // bool increment_view = 2; // мб потом отдельной ручкой, чтобы через кафку обновить
 }
 
 message GetThreadResponse {
@@ -104,6 +107,7 @@ message CreateThreadResponse {
   Post first_post = 2;
 }
 
+// Пустая строка и UNSPECIFIED означают «не менять».
 message UpdateThreadRequest {
   string thread_id = 1;
   string title = 2;

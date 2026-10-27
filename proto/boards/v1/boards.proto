@@ -24,12 +24,12 @@ message Board {
   string title = 3;
   string description = 4;
 
-  Visibility visibility = 5;
+  Visibility visibility = 5;      // PUBLIC или MODERATOR
 
   int32 thread_count = 6;
   int32 post_count = 7;
 
-  Author last_post_author = 8;     // для превью, крайний пост
+  Author last_post_author = 8;    // для превью, крайний пост
 
   google.protobuf.Timestamp last_post_at = 9;
 

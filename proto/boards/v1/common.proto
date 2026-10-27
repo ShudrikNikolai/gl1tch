@@ -5,15 +5,15 @@ package boards.v1;
 enum OrderByThread {
   ORDER_BY_THREAD_UNSPECIFIED = 0;   // = LAST_POST_AT
   ORDER_BY_THREAD_CREATED_AT = 1;
-  ORDER_BY_THREAD_UPDATED_AT = 2;
-  ORDER_BY_THREAD_LAST_POST_AT = 3;  // «бамп»: тема с новым ответом поднимается. Закреплённые темы всегда сверху
+  ORDER_BY_THREAD_LAST_POST_AT = 2;  // «бамп»: тема с новым ответом поднимается. Закреплённые темы всегда сверху
 }
 
+// Для досок допустимы только PUBLIC и MODERATOR, AUTHOR имеет смысл только для тем (проверяет сервис).
 enum Visibility {
   VISIBILITY_UNSPECIFIED = 0;
   VISIBILITY_PUBLIC = 1;       // видно всем
   VISIBILITY_AUTHOR = 2;       // только автору
-  VISIBILITY_MODERATOR = 3;       // только модерам
+  VISIBILITY_MODERATOR = 3;    // только модерам
 }
 
 enum ThreadStatus {
@@ -31,7 +31,7 @@ enum ThreadCategory {
   THREAD_CATEGORY_FLOOD = 10;
 }
 
-// Краткая информация об авторе
+// Краткая информация об авторе. username снимок на момент записи, а не актуальное имя.
 message Author {
   string user_id = 1;
   string username = 2;
