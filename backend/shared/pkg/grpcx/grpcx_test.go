@@ -142,7 +142,7 @@ func TestInternalErrorsDoNotLeak(t *testing.T) {
 		t.Fatalf("got %#v", err)
 	}
 	if strings.Contains(err.Error(), "10.0.0.5") || strings.Contains(ae.Message, "password") {
-		t.Fatalf("internal details leaked to the client: %v", err)
+		t.Fatalf("internal details leaked to the frontend: %v", err)
 	}
 }
 

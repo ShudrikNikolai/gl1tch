@@ -26,7 +26,7 @@ const (
 // поэтому опубликованное после возврата сообщение не потеряется.
 func (c *Client) Subscribe(ctx context.Context, channels ...string) (<-chan cache.Message, error) {
 	if c.subDial == nil {
-		return nil, errors.New("redis: subscriber is not configured (create the client with New or WithSubscriber)")
+		return nil, errors.New("redis: subscriber is not configured (create the frontend with New or WithSubscriber)")
 	}
 	if len(channels) == 0 {
 		return nil, errors.New("redis: no channels to subscribe")

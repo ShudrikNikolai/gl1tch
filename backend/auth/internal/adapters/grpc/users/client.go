@@ -19,6 +19,8 @@ type Client struct {
 // target в формате gRPC -> "dns:///users:9090"
 func New(target string) (*Client, error) {
 	conn, err := grpcx.Dial(target, 0) // 0: дефолтный таймаут вызова из grpcx
+	println(target)
+
 	if err != nil {
 		return nil, fmt.Errorf("users: dial %q: %w", target, err)
 	}
@@ -32,6 +34,9 @@ func (c *Client) Close() error {
 
 func (c *Client) CreateUser(ctx context.Context, id, username string) (models.User, error) {
 	resp, err := c.api.CreateUser(ctx, &usersv1.CreateUserRequest{UserId: id, Username: username})
+	println(resp)
+	println(id, username)
+
 	if err != nil {
 		return models.User{}, err
 	}

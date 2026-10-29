@@ -187,7 +187,7 @@ func TestSubscribeValidation(t *testing.T) {
 	}
 	plain := NewClient(c.pool, nil, time.Second) // без подписчика
 	if _, err := plain.Subscribe(context.Background(), "x"); err == nil {
-		t.Fatal("client without subscriber must return an error")
+		t.Fatal("frontend without subscriber must return an error")
 	}
 }
 
