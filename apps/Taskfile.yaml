@@ -1,0 +1,49 @@
+version: "3"
+
+vars:
+  COMPOSE_FILE: docker-compose.yaml
+  DC: docker compose -f {{.COMPOSE_FILE}}
+
+tasks:
+  default:
+    cmd: task --list
+
+  secrets:jwt:
+    desc: Ключ подписи JWT для auth (Ed25519), если его ещё нет
+    status:
+      - test -f "{{.ROOT_DIR}}/backend/auth/secrets/jwt-private.pem"
+    cmds:
+      - >-
+        docker run --rm --entrypoint sh
+        -v "{{.ROOT_DIR}}/backend/auth/secrets:/out" alpine/openssl
+        -c "openssl genpkey -algorithm ed25519 -out /out/jwt-private.pem && chmod 644 /out/jwt-private.pem"
+
+  db:create:
+    desc: Создать базы auth, users, boards в dev-Postgres (идемпотентно; на пустом томе они создаются сами)
+    cmds:
+      - docker exec -i db-dev psql -U root -d postgres -v ON_ERROR_STOP=1 < ../platform/compose/initdb/10-databases.sql
+
+  build:
+    desc: Собрать образы
+    cmds:
+      - "{{.DC}} build {{.CLI_ARGS}}"
+
+  up:
+    desc: Собрать и поднять сервисы (нужны сеть, dev-инфраструктура и platform)
+    cmds:
+      - "{{.DC}} up -d --build {{.CLI_ARGS}}"
+
+  down:
+    desc: Остановить сервисы
+    cmds:
+      - "{{.DC}} down"
+
+  ps:
+    desc: Состояние контейнеров
+    cmds:
+      - "{{.DC}} ps"
+
+  logs:
+    desc: "Логи: task apps:logs -- auth boards"
+    cmds:
+      - "{{.DC}} logs -f {{.CLI_ARGS}}"

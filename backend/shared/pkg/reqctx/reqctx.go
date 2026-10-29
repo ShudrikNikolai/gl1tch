@@ -20,6 +20,12 @@ const (
 	HeaderTraceparent = "traceparent"
 )
 
+const (
+	RoleUser      = enum.RoleUser
+	RoleModerator = enum.RoleModerator
+	RoleAdmin     = enum.RoleAdmin
+)
+
 type ctxKey int
 
 const (

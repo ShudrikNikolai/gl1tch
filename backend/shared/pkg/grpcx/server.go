@@ -39,7 +39,7 @@ func NewServer(log *slog.Logger, opts ...grpc.ServerOption) *grpc.Server {
 			}),
 		)),
 		grpc.ChainUnaryInterceptor(unaryServerInterceptor(log)),
-		// Совпадает с keepalive клиента (client.go): иначе сервер закрывает соединение за «слишком частые» пинги.
+		// Совпадает с keepalive клиента (frontend.go): иначе сервер закрывает соединение за «слишком частые» пинги.
 		grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{MinTime: 20 * time.Second, PermitWithoutStream: true}),
 	}
 

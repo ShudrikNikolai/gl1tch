@@ -3,13 +3,17 @@ version: 3
 vars:
   PROTO: proto
 
+includes:
+  apps:
+    taskfile: ./apps/Taskfile.yaml
+    dir: ./apps
+  platform:
+    taskfile: ./platform/Taskfile.yaml
+    dir: ./platform
 
 tasks:
   default:
     cmd: task --list
-
-  up:
-
 
   proto:lint:
     desc: линтовка proto файлов
@@ -20,7 +24,3 @@ tasks:
     deps:
       - proto:lint
     cmd: "cd proto && buf generate"
-
-  up:platform:
-
-  up:apps:

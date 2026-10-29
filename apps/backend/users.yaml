@@ -1,0 +1,14 @@
+services:
+  users:
+    build:
+      context: ../../backend
+      dockerfile: users/Dockerfile
+    image: gl1tch/users:${APPS_TAG:-dev}
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-root}:${POSTGRES_PASSWORD:-root}@db:5432/users
+      REDIS_ADDR: redis:6379
+      HTTP_PORT: 8081
+      GRPC_PORT: 9091
+    networks:
+      - gl1tch-shared
