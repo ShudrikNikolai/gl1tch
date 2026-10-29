@@ -38,7 +38,7 @@ resources:
                         request_headers_to_add: # устанавливаем куку
                           - header: { key: x-token-transport, value: cookie }
                             append_action: OVERWRITE_IF_EXISTS_OR_ADD
-                      - match: { prefix: "/auth.v1.UserService/" }
+                      - match: { prefix: "/users.v1.UserService/" }
                         route: { cluster: users-grpc, timeout: 3s }
               http_filters:
                 - name: envoy.filters.http.jwt_authn
@@ -91,7 +91,7 @@ resources:
                   typed_config:
                     "@type": type.googleapis.com/envoy.extensions.filters.http.grpc_json_transcoder.v3.GrpcJsonTranscoder
                     proto_descriptor: /etc/envoy/api.binpb
-                    services: [auth.v1.AuthService, auth.v1.UserService]
+                    services: [auth.v1.AuthService, users.v1.UserService, boards.v1.BoardService]
                     convert_grpc_status: true
                     print_options:
                       preserve_proto_field_names: true

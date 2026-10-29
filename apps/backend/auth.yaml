@@ -1,0 +1,22 @@
+secrets:
+  jwt_private_key:
+    file: ../../backend/auth/secrets/jwt-private.pem # task secrets:jwt
+
+services:
+  auth:
+    build:
+      context: ../../backend # нужен соседний модуль shared
+      dockerfile: auth/Dockerfile
+    image: gl1tch/auth:${APPS_TAG:-dev}
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-root}:${POSTGRES_PASSWORD:-root}@db:5432/auth
+      REDIS_ADDR: redis:6379
+      USERS_GRPC_ADDR: dns:///users:9091
+      JWT_PRIVATE_KEY_FILE: /run/secrets/jwt_private_key
+      # Secure-cookie по http работает не везде: в dev выключено, на проде true
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    secrets:
+      - jwt_private_key
+    networks:
+      - gl1tch-shared

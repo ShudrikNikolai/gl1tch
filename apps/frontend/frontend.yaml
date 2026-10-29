@@ -1,0 +1,20 @@
+services:
+  frontend:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile
+    image: gl1tch/frontend:${APPS_TAG:-dev}
+    restart: unless-stopped
+    environment:
+      NITRO_HOST: 0.0.0.0
+      NITRO_PORT: 3000
+      # Браузер ходит на тот же origin (/api/... через Caddy). Если у вас в runtimeConfig есть свой ключ, добавьте его сюда
+      # NUXT_PUBLIC_API_BASE: /api
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - gl1tch-shared

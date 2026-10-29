@@ -1,0 +1,10 @@
+name: gl1tch-apps
+
+networks:
+  gl1tch-shared:
+    external: true
+    name: gl1tch-shared
+
+include:
+  - path: ./backend/backend.yaml
+  - path: frontend/frontend.yaml

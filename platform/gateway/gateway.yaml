@@ -4,8 +4,8 @@ services:
     container_name: envoy
     restart: unless-stopped
     ports:
-     # - "127.0.0.1:${ENVOY_ADMIN_PORT:-9901}:9901"
-      - "9901:9901"
+      - "127.0.0.1:${ENVOY_ADMIN_PORT:-9901}:9901"
+      #- "9901:9901"
     volumes:
       - ./envoy:/etc/envoy:ro
     networks:

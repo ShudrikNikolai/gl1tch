@@ -1,0 +1,13 @@
+services:
+  boards:
+    build:
+      context: ../../backend
+      dockerfile: boards/Dockerfile
+    image: gl1tch/boards:${APPS_TAG:-dev}
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-root}:${POSTGRES_PASSWORD:-root}@db:5432/boards
+      USERS_GRPC_ADDR: dns:///users:9090
+      USERS_CACHE_TTL: 1m
+    networks:
+      - gl1tch-shared

@@ -1,0 +1,4 @@
+include:
+  - path: ./auth.yaml
+  - path: ./users.yaml
+  - path: ./boards.yaml

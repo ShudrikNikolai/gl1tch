@@ -26,7 +26,7 @@ resources:
         - lb_endpoints:
             - endpoint:
                 address:
-                  socket_address: { address: auth, port_value: 50051 }
+                  socket_address: { address: auth, port_value: 9090 }
   - name: users-grpc
     "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
     type: STRICT_DNS
@@ -42,7 +42,7 @@ resources:
         - lb_endpoints:
             - endpoint:
                 address:
-                  socket_address: { address: users, port_value: 50051 }
+                  socket_address: { address: users, port_value: 9091 }
   - name: otel-collector
     "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
     type: STRICT_DNS

@@ -1,5 +1,10 @@
 name: dev-infra
 
+networks:
+  gl1tch-shared: # чтобы сервисы из apps/ видели db, redis и mongo по имени
+    external: true
+    name: gl1tch-shared
+
 services:
   db:
     image: postgres:18.3
@@ -13,6 +18,9 @@ services:
       - "5432:5432"
     volumes:
       - postgres_dev_data:/var/lib/postgresql
+      - ./initdb:/docker-entrypoint-initdb.d:ro # базы auth, users, boards (только на пустом томе, иначе task apps:db:create)
+    networks:
+      - gl1tch-shared
 
   redis:
     image: redis:8.8-m03-trixie
@@ -22,16 +30,20 @@ services:
       - "6379:6379"
     volumes:
       - redis_dev_data:/data
+    networks:
+      - gl1tch-shared
 
-  mongo:
-    image: mongo:8
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_dev_data:/data/db
+#  mongo:
+#    image: mongo:8
+#    restart: unless-stopped
+#    ports:
+#      - "27017:27017"
+#    volumes:
+#      - mongo_dev_data:/data/db
+#    networks:
+#      - gl1tch-shared
 
 volumes:
   postgres_dev_data:
   redis_dev_data:
-  mongo_dev_data:
+#  mongo_dev_data:
