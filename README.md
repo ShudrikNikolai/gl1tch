@@ -1,7 +1,7 @@
 # GL1TCH
 
 Форум в эстетике старого терминала: Nuxt-клиент с xterm.js, Go-микросервисы, gRPC внутри и REST/JSON снаружи через Envoy.
-
+![./docs.img.png](https://github.com/ShudrikNikolai/gl1tch/blob/master/docs/img.png?raw=true)
 ## Стек
 
 - **Backend:** Go 1.26, gRPC, PostgreSQL (pgx + goose), Redis.
