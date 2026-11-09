@@ -27,6 +27,11 @@ func (uc *UseCase) ListPosts(ctx context.Context, actor models.Actor, in models.
 	return models.PostsPage{Posts: items, Page: page}, nil
 }
 
+// HasUserPosted внутренняя проверка для notifications: писал ли пользователь в теме.
+func (uc *UseCase) HasUserPosted(ctx context.Context, threadID, userID string) (bool, error) {
+	return uc.posts.HasUserPosted(ctx, threadID, userID)
+}
+
 // GetPost пост из скрытой от читателя темы выглядит как несуществующий.
 func (uc *UseCase) GetPost(ctx context.Context, actor models.Actor, id string) (posts.Post, error) {
 	if err := access.RequireAuthenticated(actor); err != nil {

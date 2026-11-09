@@ -1,12 +1,50 @@
 package model
 
 import (
-	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/apperr"
 	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/enum"
 )
+
+// Roles — text[] user_role[] из Postgres в доменном виде.
+type Roles []enum.Role
+
+func (r *Roles) Scan(src any) error {
+	var raw string
+	switch v := src.(type) {
+	case string:
+		raw = v
+	case []byte:
+		raw = string(v)
+	case nil:
+		*r = nil
+		return nil
+	default:
+		return fmt.Errorf("users: roles: unsupported scan type %T", src)
+	}
+
+	raw = strings.TrimSpace(raw)
+	if raw == "" || raw == "{}" {
+		*r = nil
+		return nil
+	}
+	raw = strings.TrimPrefix(strings.TrimSuffix(raw, "}"), "{")
+
+	parts := strings.Split(raw, ",")
+	roles := make(Roles, 0, len(parts))
+	for _, p := range parts {
+		p = strings.Trim(strings.TrimSpace(p), `"`)
+		if p != "" {
+			roles = append(roles, enum.Role(p))
+		}
+	}
+	*r = roles
+
+	return nil
+}
 
 type User struct {
 	UserID   string `db:"user_id"   json:"user_id"`
@@ -14,7 +52,7 @@ type User struct {
 	Bio      string `db:"bio"       json:"bio"`
 
 	Gender     enum.Gender     `db:"gender"      json:"gender"`
-	Role       []string        `db:"roles"       json:"roles"` //| []enum.Role
+	Role       Roles           `db:"roles"       json:"roles"`
 	UserStatus enum.UserStatus `db:"user_status" json:"user_status"`
 
 	CreatedAt time.Time `db:"created_at" json:"created_at"`
@@ -30,12 +68,12 @@ type CursorRequest struct {
 }
 
 type CursorResponse struct {
-	NextPageToken int32
+	NextPageToken string
 	HasMore       bool
 }
 
 var (
-	ErrNotFound = errors.New("users: not found")
+	ErrNotFound = apperr.NotFound("USER_NOT_FOUND", "user not found")
 
 	ErrUsernameTaken = apperr.AlreadyExists("USERNAME_TAKEN", "username is already taken")
 )

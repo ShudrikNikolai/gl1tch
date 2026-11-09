@@ -35,4 +35,5 @@ type PostUseCase interface {
 	GetPost(ctx context.Context, actor models.Actor, id string) (posts.Post, error)
 	UpdatePost(ctx context.Context, actor models.Actor, id, body string) (posts.Post, error)
 	DeletePost(ctx context.Context, actor models.Actor, id string) error
+	HasUserPosted(ctx context.Context, threadID, userID string) (bool, error)
 }

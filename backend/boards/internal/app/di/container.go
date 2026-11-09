@@ -16,6 +16,7 @@ import (
 	boarduc "github.com/ShudrikNikolai/gl1tch/backend/boards/internal/usecase/boards"
 	postuc "github.com/ShudrikNikolai/gl1tch/backend/boards/internal/usecase/posts"
 	threaduc "github.com/ShudrikNikolai/gl1tch/backend/boards/internal/usecase/threads"
+	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/kafka/producer"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
@@ -31,6 +32,8 @@ type Container struct {
 
 	Pgx   *pg.Client
 	Users *users.Client
+
+	EventsProducer *producer.Producer
 
 	BoardUC  *boarduc.UseCase
 	ThreadUC *threaduc.UseCase
@@ -58,6 +61,7 @@ func New(ctx context.Context, cfg config.Config, log *slog.Logger) (*Container, 
 		{"migrate", func() error { return c.initMigration(ctx) }},
 		{"repo", func() error { return c.initRepo(ctx) }},
 		{"clients", func() error { return c.initClients(ctx) }},
+		{"events", func() error { return c.initEvents(ctx) }},
 		{"usecases", func() error { return c.initUseCases(ctx) }},
 		{"servers", func() error { return c.initServers() }},
 	}
@@ -76,6 +80,9 @@ func New(ctx context.Context, cfg config.Config, log *slog.Logger) (*Container, 
 // Close освобождает ресурсы. Порядок важен: сначала клиент users, потом postgres.
 // Серверы останавливает Serve. Безопасно вызывать на частично собранном контейнере.
 func (c *Container) Close() {
+	if c.EventsProducer != nil {
+		_ = c.EventsProducer.Close()
+	}
 	if c.Users != nil {
 		_ = c.Users.Close()
 	}

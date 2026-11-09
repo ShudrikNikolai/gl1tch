@@ -1,7 +1,6 @@
 package validation
 
 import (
-	"net/mail"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -14,25 +13,9 @@ const (
 	maxPasswordBytes = 128
 	minNickRunes     = 3
 	maxNickRunes     = 32
-	maxEmailLen      = 254
 )
 
 func badRequest(msg string) error { return apperr.InvalidArgument("", msg) }
-
-// normalizeEmail приводит адрес к виду для хранения и сравнения.
-func normalizeEmail(raw string) (string, error) {
-	email := strings.ToLower(strings.TrimSpace(raw))
-	if email == "" || len(email) > maxEmailLen {
-		return "", badRequest("invalid email")
-	}
-	// только «голый» адрес: "Имя <a@b.c>" и подобное отклоняем
-	addr, err := mail.ParseAddress(email)
-	if err != nil || addr.Address != email || !strings.Contains(email[strings.LastIndex(email, "@"):], ".") {
-		return "", badRequest("invalid email")
-	}
-
-	return email, nil
-}
 
 func validatePassword(p string) error {
 	if utf8.RuneCountInString(p) < minPasswordRunes {

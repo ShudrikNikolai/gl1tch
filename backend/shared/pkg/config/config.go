@@ -3,11 +3,8 @@
 package config
 
 import (
-	"fmt"
-
-	"github.com/caarlos0/env/v11"
-
 	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/logger"
+	"github.com/caarlos0/env/v11"
 )
 
 // Base общие для всех сервисов настройки. Встраивайте в конфиг сервиса:
@@ -38,7 +35,6 @@ func Load[T any]() (T, error) {
 // MustLoad то же, что Load, но паникует при ошибке (для main).
 func MustLoad[T any]() T {
 	cfg, err := Load[T]()
-	fmt.Println(&cfg, "\n", "\n", err)
 	if err != nil {
 		panic(err)
 	}

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { boardsApi } from '~/api'
+import { boardsApi, notificationsApi } from '~/api'
 import type {
   Author, Board, OrderByThread, Post, Thread, ThreadCategory, ThreadStatus, Visibility,
 } from '~/api/boards-types'
@@ -22,6 +22,8 @@ type Pager =
 export const useBoardsStore = defineStore('boards', () => {
   const board = ref<Board | null>(null)
   const thread = ref<Thread | null>(null)
+  /** Последний пост, пришедший по SSE; терминал печатает его и сбрасывает. */
+  const livePost = ref<Post | null>(null)
 
   // нереактивное состояние: в шаблонах не нужно
   let boards: Board[] = []
@@ -29,6 +31,8 @@ export const useBoardsStore = defineStore('boards', () => {
   const postsByNumber = new Map<number, Post>()
   let pager: Pager | null = null
   const authors = new Map<string, string>() // username (lower) -> userId
+  let liveAbort: AbortController | null = null
+  let liveThreadId: string | null = null
 
   const path = computed(() => {
     if (!board.value) return '~'
@@ -67,7 +71,46 @@ export const useBoardsStore = defineStore('boards', () => {
     return list.find((b) => b.slug === arg || b.boardId === arg) ?? null
   }
 
+  function stopLive() {
+    liveAbort?.abort()
+    liveAbort = null
+    liveThreadId = null
+  }
+
+  function startLive(threadID: string) {
+    if (!threadID || (liveThreadId === threadID && liveAbort)) return
+    stopLive()
+
+    const ctrl = new AbortController()
+    liveAbort = ctrl
+    liveThreadId = threadID
+
+    void notificationsApi
+      .streamThread(
+        threadID,
+        async (event) => {
+          try {
+            const p = await boardsApi.posts.get(event.postId)
+            if (p.threadId !== threadID) return
+            storePost(p)
+            livePost.value = p
+          } catch {
+            // пост мог быть удалён между событием и запросом
+          }
+        },
+        ctrl.signal,
+      )
+      .catch(() => undefined)
+      .finally(() => {
+        if (liveAbort === ctrl) {
+          liveAbort = null
+          liveThreadId = null
+        }
+      })
+  }
+
   function enterBoard(b: Board) {
+    stopLive()
     board.value = b
     thread.value = null
     threadList = []
@@ -135,7 +178,10 @@ export const useBoardsStore = defineStore('boards', () => {
     thread.value = t
     postsByNumber.clear()
     pager = null
-    return { thread: t, ...(await fetchPosts(false)) }
+    livePost.value = null
+    const page = await fetchPosts(false)
+    startLive(t.threadId)
+    return { thread: t, ...page }
   }
 
   async function createThread(input: {
@@ -165,6 +211,7 @@ export const useBoardsStore = defineStore('boards', () => {
 
   async function deleteThread() {
     await boardsApi.threads.remove(thread.value!.threadId)
+    stopLive()
     thread.value = null
     postsByNumber.clear()
     pager = null
@@ -177,12 +224,16 @@ export const useBoardsStore = defineStore('boards', () => {
     [...postsByNumber.values()].find((p) => p.postId === id)?.number
 
   async function createPost(body: string, parent?: Post) {
+    const threadID = thread.value!.threadId
     const p = await boardsApi.posts.create({
-      threadId: thread.value!.threadId,
+      threadId: threadID,
       parentPostId: parent?.postId,
       body,
     })
     storePost(p)
+    // До первого поста сервер мог ответить 403; после своего поста поток пора перезапустить.
+    stopLive()
+    startLive(threadID)
     return p
   }
 
@@ -208,7 +259,9 @@ export const useBoardsStore = defineStore('boards', () => {
   function back(): 'thread' | 'board' | 'root' {
     pager = null
     if (thread.value) {
+      stopLive()
       thread.value = null
+      livePost.value = null
       postsByNumber.clear()
       return 'board'
     }
@@ -221,8 +274,10 @@ export const useBoardsStore = defineStore('boards', () => {
   }
 
   function reset() {
+    stopLive()
     board.value = null
     thread.value = null
+    livePost.value = null
     boards = []
     threadList = []
     postsByNumber.clear()
@@ -231,11 +286,12 @@ export const useBoardsStore = defineStore('boards', () => {
   }
 
   return {
-    board, thread, path,
+    board, thread, livePost, path,
     loadBoards, boardSlugs, findBoard, enterBoard, createBoard,
     fetchThreads, resolveThreadId, fetchPosts, openThread, createThread,
     updateTitle, moderate, deleteThread,
     postByNumber, numberOfPost, createPost, editPost, deletePost,
     pagerKind, threadOffset, knownUserId, back, reset,
+    startLive, stopLive,
   }
 })

@@ -17,18 +17,11 @@ type Config struct {
 	Security         Security
 	ServicesGRPCAddr ServicesGRPCAddr
 
-	// Вычистка зависших регистраций (учётка есть, профиля в users нет).
-	//PendingMaxAge time.Duration `env:"PENDING_MAX_AGE" envDefault:"2m"`
-	//PurgeEvery    time.Duration `env:"PURGE_EVERY"     envDefault:"1m"`
-
 	Argon2 Argon2
 }
 
 type Database struct {
 	DatabaseURL string `env:"DATABASE_URL,required"`
-	//DatabaseName string `env:"DATABASE_NAME" envDefault:"gl1tch-auth"`
-	//DatabaseUser string `env:"DATABASE_USER" envDefault:"gl1tch-auth"`
-	//DatabasePass string `env:"DATABASE_PASS" envDefault:"gl1tch-auth"`
 }
 
 type Security struct {

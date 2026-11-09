@@ -41,35 +41,43 @@ type PostRepo interface {
 	ListByThread(ctx context.Context, threadID string, page domain.PageRequest) ([]posts.Post, domain.PageInfo, error)
 	UpdateBody(ctx context.Context, id, body string, at time.Time) (posts.Post, error)
 	SoftDelete(ctx context.Context, id, by string, at time.Time) (posts.Post, bool, error)
+	HasUserPosted(ctx context.Context, threadID, userID string) (bool, error)
+}
+
+type EventPublisher interface {
+	PostCreated(ctx context.Context, thread threads.Thread, post posts.Post) error
 }
 
 type Deps struct {
-	Tx      Tx
-	Boards  BoardRepo
-	Threads ThreadRepo
-	Posts   PostRepo
-	Users   access.Users
-	Log     *slog.Logger
+	Tx        Tx
+	Boards    BoardRepo
+	Threads   ThreadRepo
+	Posts     PostRepo
+	Users     access.Users
+	Publisher EventPublisher
+	Log       *slog.Logger
 }
 
 type UseCase struct {
-	tx      Tx
-	boards  BoardRepo
-	threads ThreadRepo
-	posts   PostRepo
-	users   access.Users
-	log     *slog.Logger
-	now     func() time.Time
+	tx        Tx
+	boards    BoardRepo
+	threads   ThreadRepo
+	posts     PostRepo
+	users     access.Users
+	publisher EventPublisher
+	log       *slog.Logger
+	now       func() time.Time
 }
 
 func New(d Deps) *UseCase {
 	return &UseCase{
-		tx:      d.Tx,
-		boards:  d.Boards,
-		threads: d.Threads,
-		posts:   d.Posts,
-		users:   d.Users,
-		log:     d.Log,
-		now:     time.Now,
+		tx:        d.Tx,
+		boards:    d.Boards,
+		threads:   d.Threads,
+		posts:     d.Posts,
+		users:     d.Users,
+		publisher: d.Publisher,
+		log:       d.Log,
+		now:       time.Now,
 	}
 }

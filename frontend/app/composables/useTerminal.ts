@@ -3,6 +3,7 @@ import { FitAddon } from '@xterm/addon-fit'
 import { WebglAddon } from '@xterm/addon-webgl'
 import '@xterm/xterm/css/xterm.css'
 import { execute, find, tokenize, visible } from '~/commands'
+import { postLines } from '~/commands/render'
 import type { Ctx } from '~/commands/types'
 import { useBoardsStore } from '~/stores/boards'
 import { useSessionStore } from '~/stores/session'
@@ -133,6 +134,17 @@ export function useTerminal(host: Ref<HTMLElement | null>) {
     const unlockWaiters: Array<() => void> = []
     cleanup.push(
       watch(
+        () => boards.livePost,
+        (p) => {
+          if (!p) return
+          boards.livePost = null
+          if (p.author?.userId === session.user?.userId) return
+          const replyTo = p.parentPostId ? boards.numberOfPost(p.parentPostId) : undefined
+          out.system(`new post in ${boards.path}`)
+          postLines(p, replyTo).forEach((line) => out.line(line))
+        },
+      ),
+      watch(
         () => session.status,
         (status, prev) => {
           if (status === 'banned') {
@@ -177,6 +189,7 @@ export function useTerminal(host: Ref<HTMLElement | null>) {
 
   function dispose() {
     disposed = true
+    boards.stopLive()
     cleanup.forEach((fn) => fn())
     cleanup.length = 0
   }

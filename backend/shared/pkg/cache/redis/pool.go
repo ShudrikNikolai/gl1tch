@@ -38,7 +38,7 @@ func New(cfg Config, log *slog.Logger) *Client {
 		return opts
 	}
 
-	log.Info("New redis", "baseOpts", baseOpts)
+	log.Debug("redis client configured", slog.String("addr", cfg.Addr))
 
 	pool := &redigo.Pool{
 		MaxIdle:     cfg.MaxIdle,
@@ -57,14 +57,10 @@ func New(cfg Config, log *slog.Logger) *Client {
 			return err
 		},
 	}
-	log.Info("New redis pool", "pool", pool)
-
 	// Соединение подписки живёт долго: read timeout больше интервала keepalive-PING (см. pubsub.go).
 	subDial := func(ctx context.Context) (redigo.Conn, error) {
 		opts := append(baseOpts(), redigo.DialReadTimeout(subReadTimeout))
 		return redigo.DialContext(ctx, "tcp", cfg.Addr, opts...)
 	}
-	log.Info("New redis pool after")
-
 	return NewClient(pool, log, cfg.ConnectionTimeout, WithSubscriber(subDial))
 }

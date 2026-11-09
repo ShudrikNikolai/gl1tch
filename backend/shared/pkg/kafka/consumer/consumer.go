@@ -6,7 +6,6 @@ import (
 	"log/slog"
 
 	"github.com/IBM/sarama"
-
 	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/kafka"
 )
 

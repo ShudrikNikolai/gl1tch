@@ -7,9 +7,8 @@ import (
 	"log/slog"
 	"time"
 
-	redigo "github.com/gomodule/redigo/redis"
-
 	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/cache"
+	redigo "github.com/gomodule/redigo/redis"
 )
 
 var _ cache.RedisClient = (*Client)(nil)
@@ -43,7 +42,6 @@ func NewClient(pool *redigo.Pool, log *slog.Logger, connectionTimeout time.Durat
 		o(c)
 	}
 
-	log.Info("Ok!!")
 	return c
 }
 
@@ -58,9 +56,7 @@ func (c *Client) getConn(ctx context.Context) (redigo.Conn, error) {
 	}
 	conn, err := c.pool.GetContext(ctx)
 	if err != nil {
-		if conn != nil {
-			_ = conn.Close()
-		}
+		_ = conn.Close()
 		return nil, fmt.Errorf("redis: get connection: %w", err)
 	}
 

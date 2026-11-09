@@ -16,13 +16,14 @@ import (
 	"github.com/ShudrikNikolai/gl1tch/backend/boards/internal/usecase/fake"
 	"github.com/ShudrikNikolai/gl1tch/backend/boards/internal/usecase/models"
 	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/apperr"
+	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/enum"
 )
 
 var (
-	nik    = models.Actor{UserID: "u-nik", Roles: []string{"user"}}
-	anna   = models.Actor{UserID: "u-anna", Roles: []string{"user"}}
-	banned = models.Actor{UserID: "u-banned", Roles: []string{"user"}}
-	moder  = models.Actor{UserID: "u-moder", Roles: []string{"user", "moder"}}
+	nik    = models.Actor{UserID: "u-nik", Roles: []enum.Role{enum.RoleUser}}
+	anna   = models.Actor{UserID: "u-anna", Roles: []enum.Role{enum.RoleUser}}
+	banned = models.Actor{UserID: "u-banned", Roles: []enum.Role{enum.RoleUser}}
+	moder  = models.Actor{UserID: "u-moder", Roles: []enum.Role{enum.RoleUser, enum.RoleModerator}}
 )
 
 type fixture struct {

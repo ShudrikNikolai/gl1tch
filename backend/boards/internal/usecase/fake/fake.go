@@ -270,6 +270,16 @@ func (f *Posts) UpdateBody(ctx context.Context, id, body string, at time.Time) (
 	return p, nil
 }
 
+func (f *Posts) HasUserPosted(_ context.Context, threadID, userID string) (bool, error) {
+	for _, p := range f.Items {
+		if p.ThreadID == threadID && p.Author.UserID == userID && !p.Deleted() {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
 func (f *Posts) SoftDelete(ctx context.Context, id, by string, at time.Time) (posts.Post, bool, error) {
 	p, err := f.GetByID(ctx, id)
 	if err != nil {

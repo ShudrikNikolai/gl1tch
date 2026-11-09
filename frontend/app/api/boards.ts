@@ -79,6 +79,7 @@ export function createBoardsApi(api: ApiClient) {
       }),
     create: async (p: { threadId: string; parentPostId?: string; body: string }) =>
       (await api.post<{ post: Post }>('/v1/posts', p)).post,
+    get: async (id: string) => (await api.get<{ post: Post }>(`/v1/posts/${enc(id)}`)).post,
     update: async (id: string, body: string) =>
       (await api.patch<{ post: Post }>(`/v1/posts/${enc(id)}`, { body })).post,
     remove: (id: string) => api.del(`/v1/posts/${enc(id)}`),

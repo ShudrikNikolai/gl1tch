@@ -4,6 +4,12 @@ import type { TokenPair } from './types'
 
 export type SessionLossCause = 'expired' | 'banned'
 
+export interface SseEvent {
+  id?: string
+  event?: string
+  data: string
+}
+
 export interface ApiClientOptions {
   /** Например '/api': reverse proxy шлёт /api/* на gateway. */
   baseUrl: string
@@ -101,6 +107,66 @@ export function createApiClient(opts: ApiClientOptions) {
     return refreshing
   }
 
+  async function openStream(path: string, signal: AbortSignal) {
+    const access = storage.getAccess()
+    const headers: Record<string, string> = { Accept: 'text/event-stream' }
+    if (access) headers.Authorization = `Bearer ${access}`
+
+    return fetch(buildUrl(path), {
+      headers,
+      credentials: 'include',
+      signal,
+    })
+  }
+
+  async function stream(path: string, onEvent: (event: SseEvent) => void, signal: AbortSignal) {
+    let res = await openStream(path, signal)
+    if (res.status === 401) {
+      if (!(await refreshOnce())) throw parseApiError(401, undefined)
+      res = await openStream(path, signal)
+    }
+    if (!res.ok) {
+      const text = await res.text()
+      throw parseApiError(res.status, text ? safeJson(text) : undefined)
+    }
+    if (!res.body) throw new Error('stream is not supported')
+
+    const reader = res.body.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+
+    const dispatch = (block: string) => {
+      let id: string | undefined
+      let event: string | undefined
+      const data: string[] = []
+
+      for (const line of block.replace(/\r/g, '').split('\n')) {
+        if (!line || line.startsWith(':')) continue
+        const i = line.indexOf(':')
+        const field = i === -1 ? line : line.slice(0, i)
+        const value = i === -1 ? '' : line.slice(i + 1).replace(/^ /, '')
+        if (field === 'id') id = value
+        else if (field === 'event') event = value
+        else if (field === 'data') data.push(value)
+      }
+
+      if (data.length > 0) onEvent({ id, event, data: data.join('\n') })
+    }
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      buffer += decoder.decode(value, { stream: true })
+
+      let idx: number
+      while ((idx = buffer.indexOf('\n\n')) >= 0) {
+        const block = buffer.slice(0, idx)
+        buffer = buffer.slice(idx + 2)
+        dispatch(block)
+      }
+    }
+  }
+
   async function request<T>(method: string, path: string, o: RequestOptions = {}): Promise<T> {
     const usedAccess = storage.getAccess()
     try {
@@ -123,6 +189,7 @@ export function createApiClient(opts: ApiClientOptions) {
       request<T>('POST', path, { body, auth }),
     patch: <T>(path: string, body: unknown = {}) => request<T>('PATCH', path, { body }),
     del: <T = unknown>(path: string) => request<T>('DELETE', path),
+    stream,
     setTokens: (tokens: TokenPair) => storage.save(tokens),
     clearTokens: () => storage.clear(),
     hasSession: () => storage.hasSession(),

@@ -15,6 +15,10 @@ type Config struct {
 
 	// Профили из users кешируются: бан доходит до форума не позже чем через это время.
 	UsersCacheTTL time.Duration `env:"USERS_CACHE_TTL" envDefault:"1m"`
+
+	// Пустой KAFKA_BROKERS отключает публикацию событий.
+	KafkaBrokers string `env:"KAFKA_BROKERS"`
+	KafkaTopic   string `env:"KAFKA_TOPIC" envDefault:"posts.events"`
 }
 
 type Database struct {

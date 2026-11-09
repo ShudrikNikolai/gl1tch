@@ -15,6 +15,7 @@ func TestDefaultsAndRequired(t *testing.T) {
 	t.Setenv("DATABASE_URL", "postgres://x")
 	t.Setenv("REDIS_ADDR", "127.0.0.1:6379")
 	t.Setenv("JWT_PRIVATE_KEY_FILE", "/run/secrets/jwt_private_key")
+	t.Setenv("USERS_GRPC_ADDR", "dns:///localhost:9090")
 	cfg, err := sharedconfig.Load[Config]()
 	if err != nil {
 		t.Fatal(err)
@@ -22,7 +23,7 @@ func TestDefaultsAndRequired(t *testing.T) {
 	if cfg.Security.AccessTTL != 10*time.Minute ||
 		cfg.Security.RefreshTTL != 720*time.Hour ||
 		cfg.Security.RefreshReuseGrace != 5*time.Second ||
-		cfg.Security.JWTIssuer != "agora-auth" ||
+		cfg.Security.JWTIssuer != "gl1tch-auth" ||
 		cfg.Security.RevocationChannel != "auth.revocations" {
 		t.Fatalf("defaults: %+v", cfg)
 	}

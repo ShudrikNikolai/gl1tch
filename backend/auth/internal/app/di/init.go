@@ -24,7 +24,6 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
 	"github.com/pressly/goose/v3/lock"
-	"google.golang.org/grpc/reflection"
 )
 
 const startupPingTimeout = 5 * time.Second
@@ -52,7 +51,7 @@ func (c *Container) initMigration(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	locker, err := lock.NewPostgresSessionLocker(lock.WithLockTimeout(10, 30))
 	if err != nil {
@@ -140,8 +139,6 @@ func (c *Container) initServers() error {
 		Secure: sec.CookieSecure,
 		MaxAge: sec.RefreshTTL,
 	})
-	//TODO не забыть потом вырубить
-	reflection.Register(grpcSrv)
 
 	healthSrv := grpcx.RegisterHealth(grpcSrv)
 

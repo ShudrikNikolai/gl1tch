@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"sort"
 	"time"
+
+	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/metrics"
 )
 
 // Pinger проверяет зависимость (Postgres, Redis).
@@ -19,6 +21,8 @@ const readyTimeout = 2 * time.Second
 // GET /readyz                 зависимости доступны (503 и список недоступных)
 func New(deps map[string]Pinger) http.Handler {
 	mux := http.NewServeMux()
+
+	mux.Handle("GET /metrics", metrics.Handler("users"))
 
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]any{"status": "ok"})

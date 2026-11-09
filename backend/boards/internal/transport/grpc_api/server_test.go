@@ -17,6 +17,7 @@ import (
 	postuc "github.com/ShudrikNikolai/gl1tch/backend/boards/internal/usecase/posts"
 	threaduc "github.com/ShudrikNikolai/gl1tch/backend/boards/internal/usecase/threads"
 	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/apperr"
+	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/enum"
 	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/reqctx"
 	boardsv1 "github.com/ShudrikNikolai/gl1tch/backend/shared/proto/api/boards/v1"
 	commonv1 "github.com/ShudrikNikolai/gl1tch/backend/shared/proto/api/common/v1"
@@ -45,7 +46,7 @@ func newEnv() *env {
 }
 
 // asUser имитирует то, что делает интерцептор grpcx по заголовкам x-user-id и x-roles.
-func asUser(id string, roles ...string) context.Context {
+func asUser(id string, roles ...enum.Role) context.Context {
 	return reqctx.WithUser(context.Background(), id, roles)
 }
 
@@ -53,7 +54,7 @@ func code(err error) string { return apperr.From(err).Code }
 
 func TestForumFlowThroughHandlers(t *testing.T) {
 	e := newEnv()
-	nik, moder := asUser("u-nik", "user"), asUser("u-moder", "user", "moder")
+	nik, moder := asUser("u-nik", "user"), asUser("u-moder", "user", "moderator")
 
 	if _, err := e.boards.CreateBoard(nik, &boardsv1.CreateBoardRequest{Slug: "general", Title: "General"}); code(err) != "FORBIDDEN" {
 		t.Fatalf("a regular user must not create boards: %v", err)
@@ -135,11 +136,15 @@ func TestAnonymousCallsAreRejected(t *testing.T) {
 
 func TestUnknownEnumValuesBecomeInvalidArgument(t *testing.T) {
 	e := newEnv()
-	moder := asUser("u-moder", "moder")
+	moder := asUser("u-moder", "moderator")
 	b, _ := e.boards.CreateBoard(moder, &boardsv1.CreateBoardRequest{Slug: "general", Title: "G"})
 
 	_, err := e.threads.CreateThread(moder, &boardsv1.CreateThreadRequest{
-		BoardId: b.GetBoard().GetBoardId(), Title: "t", Body: "b", Category: boardsv1.ThreadCategory(99)})
+		BoardId:  b.GetBoard().GetBoardId(),
+		Title:    "t",
+		Body:     "b",
+		Category: boardsv1.ThreadCategory(99),
+	})
 	if code(err) != "INVALID_CATEGORY" {
 		t.Fatalf("category 99: %v", err)
 	}
@@ -152,7 +157,11 @@ func TestUnknownEnumValuesBecomeInvalidArgument(t *testing.T) {
 		t.Fatalf("status 99: %v", err)
 	}
 	_, err = e.threads.CreateThread(moder, &boardsv1.CreateThreadRequest{
-		BoardId: b.GetBoard().GetBoardId(), Title: "t", Body: "b", Visibility: boardsv1.Visibility(99)})
+		BoardId:    b.GetBoard().GetBoardId(),
+		Title:      "t",
+		Body:       "b",
+		Visibility: boardsv1.Visibility(99),
+	})
 	if code(err) != "INVALID_VISIBILITY" {
 		t.Fatalf("thread visibility 99: %v", err)
 	}
@@ -198,8 +207,13 @@ func TestConverters(t *testing.T) {
 	if empty.GetLastPostAuthor() != nil || empty.GetLastPostAt() != nil {
 		t.Errorf("a board without posts must not invent a last post: %+v", empty)
 	}
-	withPost := boardToProto(boards.Board{ID: "b1", ThreadCount: 2, PostCount: 5,
-		LastPostAuthor: &domain.Author{UserID: "u1", Username: "nik"}, LastPostAt: &at})
+	withPost := boardToProto(boards.Board{
+		ID:             "b1",
+		ThreadCount:    2,
+		PostCount:      5,
+		LastPostAuthor: &domain.Author{UserID: "u1", Username: "nik"},
+		LastPostAt:     &at,
+	})
 	if withPost.GetLastPostAuthor().GetUsername() != "nik" || !withPost.GetLastPostAt().AsTime().Equal(at) || withPost.GetPostCount() != 5 {
 		t.Errorf("board: %+v", withPost)
 	}

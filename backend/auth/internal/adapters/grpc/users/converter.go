@@ -15,13 +15,12 @@ func toUser(u *usersv1.User) models.User {
 	}
 }
 
-// TODO
 func toRole(r commonv1.Role) string {
 	switch r {
-	//case commonv1.Role_ROLE_ADMIN:
-	//	return reqctx.RoleAdmin
-	//case commonv1.Role_ROLE_MODERATOR:
-	//	return reqctx.RoleModerator
+	case commonv1.Role_ROLE_ADMIN:
+		return "admin"
+	case commonv1.Role_ROLE_MODERATOR:
+		return "moderator"
 	default:
 		return "user"
 	}

@@ -12,8 +12,10 @@ import (
 )
 
 func TestKindCodeRoundTrip(t *testing.T) {
-	kinds := []apperr.Kind{apperr.KindInvalidArgument, apperr.KindUnauthenticated, apperr.KindPermissionDenied,
-		apperr.KindNotFound, apperr.KindAlreadyExists, apperr.KindRateLimited, apperr.KindUnavailable, apperr.KindInternal}
+	kinds := []apperr.Kind{
+		apperr.KindInvalidArgument, apperr.KindUnauthenticated, apperr.KindPermissionDenied,
+		apperr.KindNotFound, apperr.KindAlreadyExists, apperr.KindRateLimited, apperr.KindUnavailable, apperr.KindInternal,
+	}
 	for _, k := range kinds {
 		err := FromStatus(ToStatus(apperr.New(k, "SOME_CODE", "msg")))
 		var ae *apperr.Error

@@ -9,7 +9,6 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/IBM/sarama/mocks"
-
 	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/kafka"
 )
 

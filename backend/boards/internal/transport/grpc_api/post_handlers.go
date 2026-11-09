@@ -63,3 +63,12 @@ func (s *PostGrpcServer) DeletePost(ctx context.Context, req *boardsv1.DeletePos
 
 	return &emptypb.Empty{}, nil
 }
+
+func (s *PostGrpcServer) HasUserPosted(ctx context.Context, req *boardsv1.HasUserPostedRequest) (*boardsv1.HasUserPostedResponse, error) {
+	posted, err := s.uc.HasUserPosted(ctx, req.GetThreadId(), req.GetUserId())
+	if err != nil {
+		return nil, err
+	}
+
+	return &boardsv1.HasUserPostedResponse{Posted: posted}, nil
+}

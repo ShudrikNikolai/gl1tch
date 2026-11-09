@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"sort"
 	"time"
+
+	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/metrics"
 )
 
 // Pinger проверяет зависимость (Postgres, Redis).
@@ -27,6 +29,8 @@ func New(jwks func() []byte, deps map[string]Pinger) http.Handler {
 		w.Header().Set("Cache-Control", "public, max-age=300")
 		_, _ = w.Write(jwks())
 	})
+
+	mux.Handle("GET /metrics", metrics.Handler("auth"))
 
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]any{"status": "ok"})

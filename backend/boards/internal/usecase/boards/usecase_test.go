@@ -11,12 +11,13 @@ import (
 	"github.com/ShudrikNikolai/gl1tch/backend/boards/internal/usecase/fake"
 	"github.com/ShudrikNikolai/gl1tch/backend/boards/internal/usecase/models"
 	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/apperr"
+	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/enum"
 )
 
 var (
-	user  = models.Actor{UserID: "u1", Roles: []string{"user"}}
-	moder = models.Actor{UserID: "m1", Roles: []string{"user", "moder"}}
-	admin = models.Actor{UserID: "a1", Roles: []string{"admin"}}
+	user  = models.Actor{UserID: "u1", Roles: []enum.Role{enum.RoleUser}}
+	moder = models.Actor{UserID: "m1", Roles: []enum.Role{enum.RoleUser, enum.RoleModerator}}
+	admin = models.Actor{UserID: "a1", Roles: []enum.Role{enum.RoleAdmin}}
 )
 
 func newUC() (*UseCase, *fake.Boards) {

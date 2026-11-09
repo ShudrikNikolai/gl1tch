@@ -1,9 +1,9 @@
 package grpc_api
 
 import (
-	"fmt"
 	"time"
 
+	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/enum"
 	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/protox"
 	commonv1 "github.com/ShudrikNikolai/gl1tch/backend/shared/proto/api/common/v1"
 	usersv1 "github.com/ShudrikNikolai/gl1tch/backend/shared/proto/api/users/v1"
@@ -54,21 +54,19 @@ func userToProto(u *model.User) *usersv1.User {
 		return nil
 	}
 
-	// TODO
-	roles, _ := protox.RoleToProto("user")
-	status, _ := protox.UserStatusToProto("active")
-	gender, _ := protox.GenderToProto("male")
-	//roles := make([]commonv1.Role, 1)
-	//roles[0] =
-	//for _, r := range u.Role {
-	//	roles = append(roles, roleToProto(r))
-	//}
+	role := enum.RoleUnspecified
+	if len(u.Role) > 0 {
+		role = dbRole(u.Role[0])
+	}
+	roleProto, _ := protox.RoleToProto(role)
+	status, _ := protox.UserStatusToProto(u.UserStatus)
+	gender, _ := protox.GenderToProto(u.Gender)
 
 	return &usersv1.User{
 		UserId:      u.UserID,
 		Username:    u.Username,
 		Bio:         u.Bio,
-		Role:        roles,
+		Role:        roleProto,
 		Status:      status,
 		Gender:      gender,
 		CreatedAt:   timestampPtr(&u.CreatedAt),
@@ -78,9 +76,18 @@ func userToProto(u *model.User) *usersv1.User {
 	}
 }
 
+// dbRole приводит историческое значение БД к каноническому enum.
+func dbRole(raw enum.Role) enum.Role {
+	if raw == "moder" {
+		return enum.RoleModerator
+	}
+
+	return raw
+}
+
 func cursorToProto(c model.CursorResponse) *commonv1.CursorPaginationResponse {
 	return &commonv1.CursorPaginationResponse{
-		NextPageToken: fmt.Sprintf("%d", c.NextPageToken),
+		NextPageToken: c.NextPageToken,
 		HasMore:       c.HasMore,
 	}
 }
@@ -94,17 +101,9 @@ func CursorRequestConverter(data *usersv1.ListUsersRequest) *model.CursorRequest
 
 func CursorResponseConverter(res *model.CursorResponse) *commonv1.CursorPaginationResponse {
 	return &commonv1.CursorPaginationResponse{
-		NextPageToken: fmt.Sprintf("%d", res.NextPageToken),
+		NextPageToken: res.NextPageToken,
 		HasMore:       res.HasMore,
 	}
-}
-
-func timestamp(t time.Time) *timestamppb.Timestamp {
-	if t.IsZero() {
-		return nil
-	}
-
-	return timestamppb.New(t)
 }
 
 func timestampPtr(t *time.Time) *timestamppb.Timestamp {
@@ -113,21 +112,4 @@ func timestampPtr(t *time.Time) *timestamppb.Timestamp {
 	}
 
 	return timestamppb.New(*t)
-}
-
-func timestampToTime(ts *timestamppb.Timestamp) time.Time {
-	if ts == nil {
-		return time.Time{}
-	}
-
-	return ts.AsTime()
-}
-
-func timestampPtrToTimePtr(ts *timestamppb.Timestamp) *time.Time {
-	if ts == nil {
-		return nil
-	}
-
-	t := ts.AsTime()
-	return &t
 }

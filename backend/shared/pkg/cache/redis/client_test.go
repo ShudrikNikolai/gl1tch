@@ -8,9 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/alicebob/miniredis/v2"
-
 	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/cache"
+	"github.com/alicebob/miniredis/v2"
 )
 
 func newTestClient(t *testing.T) (*Client, *miniredis.Miniredis) {

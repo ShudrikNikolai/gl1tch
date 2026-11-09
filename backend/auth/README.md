@@ -22,22 +22,25 @@ Refresh-токен хранится в Redis только в виде SHA-256 х
 
 ## Запуск локально
 
-1. Создать ключ: `openssl genpkey -algorithm ed25519 -out secrets/jwt-private.pem` (каталог `secrets/` в git не попадает).
-2. `cp .env.example .env`, поправить адреса.
-3. Применить `cmd/migrations/*.up.sql` к Postgres.
-4. `go run ./cmd/auth`
+Нужны Postgres, Redis и запущенный `users` (gRPC, адрес в `USERS_GRPC_ADDR`).
 
-Тесты: `go test ./...`
+1. Создать ключ: `openssl genpkey -algorithm ed25519 -out secrets/jwt-private.pem` (ключ не должен попадать в git).
+2. `cp .env.example .env`, поправить адреса.
+3. `go run ./cmd/auth` — goose-миграции из `internal/infrastructure/storage/pg/migrations` применятся при старте.
+
+Порты по умолчанию: HTTP `8080` (JWKS и пробы), gRPC `9090` (сервис).
+
+Тесты: `go test ./...`. Линт: `golangci-lint run ./...`.
 
 ## Структура
 
 ```
 cmd/auth            точка входа
-cmd/migrations      SQL-миграции
 internal/app        запуск и DI (app/di)
 internal/transport  gRPC и HTTP, конвертация protobuf <-> модели usecase
 internal/usecase    сценарии (register, login, refresh, logout), свои модели
 internal/modules    credentials, refresh_tokens (домен, repository, service)
 internal/adapters   клиенты других сервисов (users)
-internal/infrastructure  config, pg, password, uuid, validate
+internal/infrastructure  config, password, uuid, validate
+internal/infrastructure/storage/pg/migrations  SQL goose, встроены в бинарник
 ```

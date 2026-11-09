@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/IBM/sarama"
-
 	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/kafka"
 )
 
@@ -18,7 +17,7 @@ var discard = slog.New(slog.NewTextHandler(io.Discard, nil))
 // Встраивание интерфейсов: тест не ломается, если в sarama появятся новые методы.
 type fakeSession struct {
 	sarama.ConsumerGroupSession
-	ctx    context.Context
+	ctx    context.Context //nolint:containedctx // тестовый адаптер sarama
 	marked []int64
 }
 

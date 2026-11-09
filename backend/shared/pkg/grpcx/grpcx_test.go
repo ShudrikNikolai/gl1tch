@@ -10,15 +10,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/apperr"
 	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/enum"
+	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/reqctx"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/test/bufconn"
 	"google.golang.org/protobuf/types/known/wrapperspb"
-
-	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/apperr"
-	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/reqctx"
 )
 
 var discard = slog.New(slog.NewTextHandler(io.Discard, nil))

@@ -118,6 +118,19 @@ func (r *Repo) UpdateBody(ctx context.Context, id, body string, at time.Time) (p
 	return p, nil
 }
 
+func (r *Repo) HasUserPosted(ctx context.Context, threadID, userID string) (bool, error) {
+	var posted bool
+	if err := r.db.DB(ctx).QueryRow(ctx, qHasUserPosted, threadID, userID).Scan(&posted); err != nil {
+		if pg.InvalidInput(err) {
+			return false, nil
+		}
+
+		return false, fmt.Errorf("posts: has user posted: %w", err)
+	}
+
+	return posted, nil
+}
+
 func (r *Repo) SoftDelete(ctx context.Context, id, by string, at time.Time) (posts.Post, bool, error) {
 	p, err := scan(r.db.DB(ctx).QueryRow(ctx, qSoftDelete, id, at, by))
 	if err == nil {

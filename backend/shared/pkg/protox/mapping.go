@@ -88,6 +88,7 @@ func GenderFromProto(p commonv1.Gender) (enum.Gender, error) {
 	}
 	return m, nil
 }
+
 func GenderToProto(m enum.Gender) (commonv1.Gender, error) {
 	p, ok := genderToProto[m]
 	if !ok {
@@ -101,6 +102,7 @@ var orderFromProto = map[commonv1.Order]enum.Order{
 	commonv1.Order_ORDER_ASC:         enum.OrderAsc,
 	commonv1.Order_ORDER_DESC:        enum.OrderDesc,
 }
+
 var orderToProto = map[enum.Order]commonv1.Order{
 	enum.OrderUnspecified: commonv1.Order_ORDER_UNSPECIFIED,
 	enum.OrderAsc:         commonv1.Order_ORDER_ASC,
@@ -114,6 +116,7 @@ func OrderFromProto(p commonv1.Order) (enum.Order, error) {
 	}
 	return m, nil
 }
+
 func OrderToProto(m enum.Order) (commonv1.Order, error) {
 	p, ok := orderToProto[m]
 	if !ok {

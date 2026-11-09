@@ -17,7 +17,7 @@ const (
 	HeaderRequestID   = "x-request-id"
 	HeaderUserID      = "x-user-id"
 	HeaderRoles       = "x-roles"
-	HeaderTraceparent = "traceparent"
+	HeaderTransparent = "transparent"
 )
 
 const (
@@ -34,9 +34,6 @@ const (
 	rolesKey
 )
 
-// TODO править все!!!
-// NewRequestID генерирует идентификатор запроса (16 случайных байт в hex)
-// //TODO заменить uuid
 func NewRequestID() string {
 	b := make([]byte, 16)
 	_, _ = rand.Read(b)

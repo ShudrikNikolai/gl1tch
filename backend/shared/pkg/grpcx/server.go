@@ -12,7 +12,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/apperr"
+	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/apperr/grpcerr"
 	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/enum"
+	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/reqctx"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
@@ -20,10 +23,6 @@ import (
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/stats"
-
-	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/apperr"
-	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/apperr/grpcerr"
-	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/reqctx"
 )
 
 // NewServer создаёт сервер с интерсептором по умолчанию. Дополнительные опции (creds, лимиты) идут после него.

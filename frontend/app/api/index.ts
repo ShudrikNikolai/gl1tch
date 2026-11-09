@@ -1,6 +1,7 @@
 import { createApiClient, type SessionLossCause } from './client'
 import { createAuthApi } from './auth'
 import { createBoardsApi } from './boards'
+import { createNotificationsApi } from './notifications'
 import { createLocalTokenStorage } from './token-storage'
 import { createUsersApi } from './users'
 
@@ -23,3 +24,4 @@ export const api = createApiClient({
 export const authApi = createAuthApi(api)
 export const usersApi = createUsersApi(api)
 export const boardsApi = createBoardsApi(api)
+export const notificationsApi = createNotificationsApi(api)

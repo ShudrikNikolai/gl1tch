@@ -9,7 +9,7 @@ import (
 type Kind int
 
 const (
-	KindInternal Kind = iota //всё необработанное
+	KindInternal Kind = iota // всё необработанное
 	KindInvalidArgument
 	KindUnauthenticated
 	KindPermissionDenied
@@ -65,8 +65,10 @@ func Wrap(kind Kind, code, message string, err error) *Error {
 	return e
 }
 
-func InvalidArgument(code, message string) *Error  { return New(KindInvalidArgument, code, message) }
-func Unauthenticated(code, message string) *Error  { return New(KindUnauthenticated, code, message) }
+func InvalidArgument(code, message string) *Error { return New(KindInvalidArgument, code, message) }
+
+func Unauthenticated(code, message string) *Error { return New(KindUnauthenticated, code, message) }
+
 func PermissionDenied(code, message string) *Error { return New(KindPermissionDenied, code, message) }
 func NotFound(code, message string) *Error         { return New(KindNotFound, code, message) }
 func AlreadyExists(code, message string) *Error    { return New(KindAlreadyExists, code, message) }

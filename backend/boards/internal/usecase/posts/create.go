@@ -3,6 +3,7 @@ package posts
 import (
 	"context"
 	"errors"
+	"log/slog"
 
 	"github.com/ShudrikNikolai/gl1tch/backend/boards/internal/domain"
 	"github.com/ShudrikNikolai/gl1tch/backend/boards/internal/infrastructure/uuid"
@@ -70,6 +71,14 @@ func (uc *UseCase) CreatePost(ctx context.Context, actor models.Actor, in models
 	})
 	if err != nil {
 		return posts.Post{}, err
+	}
+
+	// Уведомления best-effort: пост уже создан, ошибка публикации не отменяет его.
+	if uc.publisher != nil {
+		if err := uc.publisher.PostCreated(ctx, thread, created); err != nil {
+			uc.log.WarnContext(ctx, "publish post created event failed",
+				slog.String("post_id", created.ID), slog.String("thread_id", thread.ID), slog.Any("error", err))
+		}
 	}
 
 	return created, nil

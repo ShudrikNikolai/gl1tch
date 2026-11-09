@@ -6,7 +6,6 @@ import (
 	"log/slog"
 
 	"github.com/IBM/sarama"
-
 	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/kafka"
 )
 
@@ -31,6 +30,10 @@ func NewProducer(syncProducer sarama.SyncProducer, topic string, log *slog.Logge
 // Пустой key означает «без ключа» (round-robin)
 // Содержимое сообщения не логируетс
 // Ошибка возвращается вызывающему без доп логирования
+func (p *Producer) Close() error {
+	return p.syncProducer.Close()
+}
+
 func (p *Producer) Send(ctx context.Context, key, value []byte, headers ...kafka.Header) error {
 	if err := ctx.Err(); err != nil {
 		return err

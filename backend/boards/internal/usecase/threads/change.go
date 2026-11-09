@@ -70,7 +70,7 @@ func (uc *UseCase) DeleteThread(ctx context.Context, actor models.Actor, id stri
 	if err != nil {
 		return err
 	}
-	if !actor.IsModerator() && !(actor.UserID == t.Author.UserID && t.PostCount <= 1) {
+	if !actor.IsModerator() && (actor.UserID != t.Author.UserID || t.PostCount > 1) {
 		return access.ErrForbidden
 	}
 

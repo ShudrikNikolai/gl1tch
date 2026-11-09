@@ -5,18 +5,17 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/apperr/grpcerr"
+	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/reqctx"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
-
-	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/apperr/grpcerr"
-	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/reqctx"
 )
 
 // DefaultTimeout применяется, если у вызова нет своего deadline.
-const DefaultTimeout = 2 * time.Second
+const DefaultTimeout = 5 * time.Second
 
 // roundRobin: клиентская балансировка по всем адресам, которые вернул resolver (для dns:///сервис:9090 это все реплики).
 const roundRobin = `{"loadBalancingConfig":[{"round_robin":{}}]}`
@@ -37,7 +36,14 @@ func Dial(target string, defaultTimeout time.Duration, opts ...grpc.DialOption) 
 		grpc.WithChainUnaryInterceptor(unaryClientInterceptor(defaultTimeout)),
 	}
 
-	return grpc.NewClient(target, append(base, opts...)...)
+	conn, err := grpc.NewClient(target, append(base, opts...)...)
+	if err != nil {
+		return nil, err
+	}
+	// Соединение устанавливается в фоне; сервис не падает, если зависимость ещё поднимается.
+	conn.Connect()
+
+	return conn, nil
 }
 
 func unaryClientInterceptor(defaultTimeout time.Duration) grpc.UnaryClientInterceptor {

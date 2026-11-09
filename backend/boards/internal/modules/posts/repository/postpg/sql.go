@@ -23,4 +23,9 @@ const (
 	qSoftDelete = `UPDATE posts SET deleted_at = $2, deleted_by = $3::uuid, updated_at = $2
 		WHERE post_id = $1::uuid AND deleted_at IS NULL
 		RETURNING ` + columns
+
+	qHasUserPosted = `SELECT EXISTS (
+		SELECT 1 FROM posts
+		WHERE thread_id = $1::uuid AND author_id = $2::uuid AND deleted_at IS NULL
+	)`
 )

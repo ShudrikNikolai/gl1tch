@@ -22,9 +22,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
-
 	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/cache"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 var discard = slog.New(slog.NewTextHandler(io.Discard, nil))
@@ -76,8 +75,10 @@ func (j *jwksServer) set(s *Signer, status int) {
 }
 
 func verifier(url string, mutate ...func(*VerifierConfig)) *Verifier {
-	cfg := VerifierConfig{JWKSURL: url, Issuer: issuer, RefreshInterval: time.Hour, MinRefreshGap: time.Millisecond,
-		HTTPTimeout: 2 * time.Second, Leeway: time.Second}
+	cfg := VerifierConfig{
+		JWKSURL: url, Issuer: issuer, RefreshInterval: time.Hour, MinRefreshGap: time.Millisecond,
+		HTTPTimeout: 2 * time.Second, Leeway: time.Second,
+	}
 	for _, m := range mutate {
 		m(&cfg)
 	}
@@ -101,7 +102,7 @@ func TestSignVerifyRoundTrip(t *testing.T) {
 	if claims.Subject != "user-1" || len(claims.Roles) != 2 || claims.Roles[1] != "moder" || claims.Issuer != issuer || claims.ID == "" {
 		t.Fatalf("claims: %+v", claims)
 	}
-	if d := claims.ExpiresAt.Time.Sub(exp); d < -time.Second || d > time.Second {
+	if d := claims.ExpiresAt.Sub(exp); d < -time.Second || d > time.Second {
 		t.Fatalf("exp mismatch: %v", d)
 	}
 }

@@ -7,9 +7,8 @@ import (
 	"log/slog"
 	"time"
 
-	redigo "github.com/gomodule/redigo/redis"
-
 	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/cache"
+	redigo "github.com/gomodule/redigo/redis"
 )
 
 const (

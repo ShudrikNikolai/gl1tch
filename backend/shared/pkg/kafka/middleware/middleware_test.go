@@ -44,8 +44,10 @@ func (p *fakeProducer) Send(_ context.Context, key, value []byte, headers ...kaf
 }
 
 func msg() kafka.Message {
-	return kafka.Message{Topic: "posts.events", Partition: 2, Offset: 42, Key: []byte("k"), Value: []byte("v"),
-		Headers: map[string][]byte{"trace": []byte("t1")}}
+	return kafka.Message{
+		Topic: "posts.events", Partition: 2, Offset: 42, Key: []byte("k"), Value: []byte("v"),
+		Headers: map[string][]byte{"trace": []byte("t1")},
+	}
 }
 
 func TestRetrySucceedsAfterFailures(t *testing.T) {
@@ -85,7 +87,8 @@ func TestRetryStopsOnContextCancel(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	calls := 0
 	h := Retry(RetryConfig{MaxAttempts: 10, BaseDelay: time.Hour, MaxDelay: time.Hour}, discard)(
-		func(context.Context, kafka.Message) error { calls++; cancel(); return errors.New("x") })
+		func(context.Context, kafka.Message) error { calls++; cancel(); return errors.New("x") },
+	)
 	done := make(chan error, 1)
 	go func() { done <- h(ctx, msg()) }()
 	select {

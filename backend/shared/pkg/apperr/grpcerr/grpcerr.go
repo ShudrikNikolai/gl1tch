@@ -4,11 +4,10 @@ import (
 	"context"
 	"errors"
 
+	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/apperr"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-
-	"github.com/ShudrikNikolai/gl1tch/backend/shared/pkg/apperr"
 )
 
 // Domain значение google.rpc.ErrorInfo.domain для ошибок проекта.

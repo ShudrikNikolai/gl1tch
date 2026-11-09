@@ -30,7 +30,7 @@ func DLQ(dlq kafka.Producer, log *slog.Logger) kafka.Middleware {
 			if sendErr := dlq.Send(ctx, msg.Key, msg.Value, dlqHeaders(msg, err)...); sendErr != nil {
 				log.ErrorContext(ctx, "kafka: send to dlq failed",
 					slog.String("topic", msg.Topic), slog.Int64("offset", msg.Offset), slog.Any("error", sendErr))
-				return fmt.Errorf("%w (dlq send failed: %v)", err, sendErr)
+				return fmt.Errorf("%w (dlq send failed: %w)", err, sendErr)
 			}
 
 			log.WarnContext(ctx, "kafka: message moved to dlq",

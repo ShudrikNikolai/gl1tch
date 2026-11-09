@@ -19,4 +19,6 @@ type Repository interface {
 	UpdateBody(ctx context.Context, id, body string, at time.Time) (posts.Post, error)
 	// SoftDelete помечает пост удалённым. deleted=false: пост уже был удалён (повтор безопасен, счётчики менять не надо).
 	SoftDelete(ctx context.Context, id, by string, at time.Time) (p posts.Post, deleted bool, err error)
+	// HasUserPosted сообщает, есть ли у пользователя неудалённый пост в теме.
+	HasUserPosted(ctx context.Context, threadID, userID string) (bool, error)
 }
