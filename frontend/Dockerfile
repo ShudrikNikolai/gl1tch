@@ -6,7 +6,7 @@ ENV CI=true
 
 # --- зависимости: слой пересобирается только при смене манифестов ---
 FROM base AS deps
-COPY package.json pnpm-lock.yaml* yarn.lock* package-lock.json* .npmrc* ./
+COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* yarn.lock* package-lock.json* .npmrc* ./
 # кеш менеджеров пакетов лежит в cache-mount и в слой не попадает, поэтому очистка кеша не нужна
 # hadolint ignore=DL3060
 RUN --mount=type=cache,target=/root/.npm \

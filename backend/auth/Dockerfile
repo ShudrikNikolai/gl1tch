@@ -22,4 +22,5 @@ COPY --from=build /out/auth /auth
 
 # 8080: HTTP (пробы, jwks у auth), 9090: gRPC. Секреты монтируются снаружи, в образ не кладутся.
 EXPOSE 8080 9090
+HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=5 CMD ["/auth", "healthcheck"]
 ENTRYPOINT ["/auth"]

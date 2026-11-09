@@ -1,0 +1,4 @@
+topics:
+  - name: posts.events
+    partitions: 6
+    replication: 1

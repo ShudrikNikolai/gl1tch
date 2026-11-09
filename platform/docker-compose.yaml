@@ -12,4 +12,4 @@ include:
   - path: ./edge/edge.yaml
   - path: ./gateway/gateway.yaml
   - path: ./observability/observability.yaml
-    #  - path: ./kafka/kafka.yaml TODO
+  - path: ./kafka/kafka.yaml

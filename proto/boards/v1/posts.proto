@@ -24,6 +24,8 @@ service PostService {
   rpc DeletePost(DeletePostRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = { delete: "/v1/posts/{post_id}" };
   };
+  // Внутренний вызов notifications: проверка, что пользователь уже писал в теме.
+  rpc HasUserPosted(HasUserPostedRequest) returns (HasUserPostedResponse);
   // rpc ReactToPost(ReactToPostRequest) returns (ReactToPostResponse);
 }
 
@@ -82,6 +84,15 @@ message UpdatePostResponse {
 
 message DeletePostRequest {
   string post_id = 1;
+}
+
+message HasUserPostedRequest {
+  string thread_id = 1;
+  string user_id = 2;
+}
+
+message HasUserPostedResponse {
+  bool posted = 1;
 }
 
 //message ReactToPostRequest {

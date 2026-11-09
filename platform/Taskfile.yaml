@@ -11,14 +11,17 @@ tasks:
     cmd: task --list
 
   create:network:
-    desc: создание общей сети
+    desc: создание общей сети (идемпотентно)
+    status:
+      - docker network inspect {{.NETWORK_NAME}}
     cmd: "docker network create {{.NETWORK_NAME}}"
 
   proto:gen:
     desc: Go-код из proto + дескриптор для envoy
     dir: ../proto
     cmds:
-      - buf dep update
+      - cmd: buf dep update
+        ignore_error: true
       - buf generate
       - buf build -o ../platform/gateway/envoy/api.binpb
 

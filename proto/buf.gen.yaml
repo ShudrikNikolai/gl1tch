@@ -11,13 +11,13 @@ managed:
 
 plugins:
   # Go - типы сообщений
-  - remote: buf.build/protocolbuffers/go:v1.36.12
+  - local: protoc-gen-go
     out: ../backend/shared/proto/api
     opt:
       - paths=source_relative
 
   # Go - gRPC stubs
-  - remote: buf.build/grpc/go:v1.6.2
+  - local: protoc-gen-go-grpc
     out: ../backend/shared/proto/api
     opt:
       - paths=source_relative

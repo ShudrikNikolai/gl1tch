@@ -15,6 +15,34 @@ tasks:
   default:
     cmd: task --list
 
+  bootstrap:
+    desc: подготовить proto-код и зависимости frontend
+    cmds:
+      - task platform:proto:gen
+      - cmd: pnpm --dir frontend install
+
+  test:
+    desc: тесты всех Go-модулей
+    cmds:
+      - cmd: cd backend/auth && go test ./...
+      - cmd: cd backend/users && go test ./...
+      - cmd: cd backend/boards && go test ./...
+      - cmd: cd backend/shared && go test ./...
+      - cmd: cd backend/notifications && go test ./...
+
+  lint:
+    desc: линт всех Go-модулей
+    cmds:
+      - cmd: cd backend/auth && golangci-lint run ./...
+      - cmd: cd backend/users && golangci-lint run ./...
+      - cmd: cd backend/boards && golangci-lint run ./...
+      - cmd: cd backend/shared && golangci-lint run ./...
+      - cmd: cd backend/notifications && golangci-lint run ./...
+
+  smoke:
+    desc: проверка запущенного стека через HTTP
+    cmd: node scripts/smoke.mjs
+
   proto:lint:
     desc: линтовка proto файлов
     cmd: "cd proto && buf lint"

@@ -5,9 +5,16 @@ services:
       dockerfile: boards/Dockerfile
     image: gl1tch/boards:${APPS_TAG:-dev}
     restart: unless-stopped
+    depends_on:
+      users:
+        condition: service_healthy
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-root}:${POSTGRES_PASSWORD:-root}@db:5432/boards
+      HTTP_PORT: 8080
+      GRPC_PORT: 9090
       USERS_GRPC_ADDR: dns:///users:9090
       USERS_CACHE_TTL: 1m
+      KAFKA_BROKERS: kafka:9092
+      KAFKA_TOPIC: posts.events
     networks:
       - gl1tch-shared

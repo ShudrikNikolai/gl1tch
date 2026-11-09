@@ -1,0 +1,20 @@
+services:
+  notifications:
+    build:
+      context: ../../backend
+      dockerfile: notifications/Dockerfile
+    image: gl1tch/notifications:${APPS_TAG:-dev}
+    restart: unless-stopped
+    depends_on:
+      boards:
+        condition: service_healthy
+    environment:
+      HTTP_PORT: 8080
+      KAFKA_BROKERS: kafka:9092
+      KAFKA_TOPIC: posts.events
+      KAFKA_GROUP: notifications
+      JWKS_URL: http://auth:8080/.well-known/jwks.json
+      JWT_ISSUER: gl1tch-auth
+      BOARDS_GRPC_ADDR: dns:///boards:9090
+    networks:
+      - gl1tch-shared

@@ -34,12 +34,18 @@ resources:
                     routes:
                       # Маршрут выбирается ПОСЛЕ транскодинга, по gRPC-пути
                       - match: { prefix: "/auth.v1.AuthService/" }
-                        route: { cluster: auth-grpc, timeout: 3s }
+                        route: { cluster: auth-grpc, timeout: 5s }
                         request_headers_to_add: # устанавливаем куку
                           - header: { key: x-token-transport, value: cookie }
                             append_action: OVERWRITE_IF_EXISTS_OR_ADD
                       - match: { prefix: "/users.v1.UserService/" }
-                        route: { cluster: users-grpc, timeout: 3s }
+                        route: { cluster: users-grpc, timeout: 5s }
+                      - match: { prefix: "/boards.v1.BoardService/" }
+                        route: { cluster: boards-grpc, timeout: 5s }
+                      - match: { prefix: "/boards.v1.ThreadService/" }
+                        route: { cluster: boards-grpc, timeout: 5s }
+                      - match: { prefix: "/boards.v1.PostService/" }
+                        route: { cluster: boards-grpc, timeout: 5s }
               http_filters:
                 - name: envoy.filters.http.jwt_authn
                   typed_config:
@@ -55,7 +61,6 @@ resources:
                         # issuer / audiences добавь, если auth их проставляет в токены
                         claim_to_headers:
                           - { header_name: x-user-id, claim_name: sub }
-                          - { header_name: x-roles, claim_name: role }
                           - { header_name: x-roles, claim_name: roles_csv }
                         payload_in_metadata: jwt_payload
                     rules:
@@ -74,6 +79,8 @@ resources:
                         no-direct-grpc:
                           permissions:
                             - url_path: { path: { prefix: "/auth.v1." } }
+                            - url_path: { path: { prefix: "/users.v1." } }
+                            - url_path: { path: { prefix: "/boards.v1." } }
                           principals:
                             - any: true
                         # /admin/* только для role=admin
@@ -91,10 +98,15 @@ resources:
                   typed_config:
                     "@type": type.googleapis.com/envoy.extensions.filters.http.grpc_json_transcoder.v3.GrpcJsonTranscoder
                     proto_descriptor: /etc/envoy/api.binpb
-                    services: [auth.v1.AuthService, users.v1.UserService, boards.v1.BoardService]
+                    services:
+                      - auth.v1.AuthService
+                      - users.v1.UserService
+                      - boards.v1.BoardService
+                      - boards.v1.ThreadService
+                      - boards.v1.PostService
                     convert_grpc_status: true
                     print_options:
-                      preserve_proto_field_names: true
+                      preserve_proto_field_names: false
                       always_print_primitive_fields: true
                 - name: envoy.filters.http.router
                   typed_config:

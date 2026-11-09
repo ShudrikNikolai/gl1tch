@@ -17,7 +17,7 @@ scrape_configs:
   - job_name: services
     metrics_path: /metrics
     dns_sd_configs:
-      - names: [auth, boards, chats, notifications, ws-gateway]
+      - names: [auth, users, boards, notifications]
         type: A
         port: 8080
     relabel_configs:

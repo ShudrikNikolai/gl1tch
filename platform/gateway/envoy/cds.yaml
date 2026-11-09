@@ -42,7 +42,23 @@ resources:
         - lb_endpoints:
             - endpoint:
                 address:
-                  socket_address: { address: users, port_value: 9091 }
+                  socket_address: { address: users, port_value: 9090 }
+  - name: boards-grpc
+    "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+    type: STRICT_DNS
+    connect_timeout: 2s
+    typed_extension_protocol_options:
+      envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+        "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+        explicit_http_config:
+          http2_protocol_options: {}
+    load_assignment:
+      cluster_name: boards-grpc
+      endpoints:
+        - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address: { address: boards, port_value: 9090 }
   - name: otel-collector
     "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
     type: STRICT_DNS
